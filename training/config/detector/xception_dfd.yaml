@@ -1,0 +1,80 @@
+# Xception detector trained on DFD dataset
+log_dir: ./logs/training
+
+# model setting
+pretrained: ./training/pretrained/pretrained/xception-b5690688.pth
+model_name: xception
+backbone_name: xception
+
+# backbone setting
+backbone_config:
+  mode: original
+  num_classes: 2
+  inc: 3
+  dropout: false
+
+# dataset
+all_dataset: [DFD]
+train_dataset: [DFD]
+test_dataset: [DFD]
+dataset_json_folder: ./preprocessing/dataset_json
+
+compression: c23
+train_batchSize: 32
+test_batchSize: 32
+workers: 4
+frame_num: {'train': 8, 'test': 8}
+resolution: 256
+with_mask: false
+with_landmark: false
+
+# data augmentation
+use_data_augmentation: true
+data_aug:
+  flip_prob: 0.5
+  rotate_prob: 0.0
+  rotate_limit: [-10, 10]
+  blur_prob: 0.5
+  blur_limit: [3, 7]
+  brightness_prob: 0.5
+  brightness_limit: [-0.1, 0.1]
+  contrast_limit: [-0.1, 0.1]
+  quality_lower: 40
+  quality_upper: 100
+
+mean: [0.5, 0.5, 0.5]
+std: [0.5, 0.5, 0.5]
+
+# optimizer
+optimizer:
+  type: adam
+  adam:
+    lr: 0.0002
+    beta1: 0.9
+    beta2: 0.999
+    eps: 0.00000001
+    weight_decay: 0.0005
+    amsgrad: false
+  sgd:
+    lr: 0.0002
+    momentum: 0.9
+    weight_decay: 0.0005
+
+lr_scheduler: null
+nEpochs: 10
+start_epoch: 0
+save_epoch: 1
+rec_iter: 100
+manualSeed: 1024
+save_ckpt: true
+save_feat: true
+
+loss_func: cross_entropy
+losstype: null
+metric_scoring: auc
+
+cuda: true
+cudnn: true
+
+rgb_dir: ./datasets/rgb
+lmdb: false

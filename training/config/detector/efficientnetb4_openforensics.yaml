@@ -1,0 +1,108 @@
+model_name: efficientnetb4
+backbone_name: efficientnetb4
+pretrained: null
+backbone_config:
+  num_classes: 2
+  inc: 3
+  dropout: false
+  mode: Original
+
+all_dataset:
+  - OpenForensics
+train_dataset:
+  - OpenForensics
+test_dataset:
+  - OpenForensics
+
+train_batchSize: 32
+test_batchSize: 32
+workers: 4
+compression: c23
+frame_num:
+  train: 4
+  test: 4
+resolution: 256
+with_mask: false
+with_landmark: false
+use_data_augmentation: true
+data_aug:
+  flip_prob: 0.5
+  rotate_prob: 0.0
+  rotate_limit: [-10, 10]
+  blur_prob: 0.3
+  blur_limit: [3, 5]
+  brightness_prob: 0.3
+  brightness_limit: [-0.1, 0.1]
+  contrast_limit: [-0.1, 0.1]
+  quality_lower: 40
+  quality_upper: 100
+
+mean: [0.5, 0.5, 0.5]
+std: [0.5, 0.5, 0.5]
+
+optimizer:
+  type: adam
+  adam:
+    lr: 0.0002
+    beta1: 0.9
+    beta2: 0.999
+    eps: 0.00000001
+    weight_decay: 0.0005
+    amsgrad: false
+  sgd:
+    lr: 0.0002
+    momentum: 0.9
+    weight_decay: 0.0005
+
+lr_scheduler: null
+nEpochs: 10
+start_epoch: 0
+save_epoch: 1
+rec_iter: 1
+logdir: ./logs
+manualSeed: 1024
+loss_func: cross_entropy
+losstype: null
+metric_scoring: auc
+cuda: false
+cudnn: true
+mode: train
+lmdb: false
+dry_run: false
+rgb_dir: ./datasets/rgb
+lmdb_dir: ./datasets/lmdb
+dataset_json_folder: ./preprocessing/dataset_json
+
+SWA: false
+save_avg: true
+
+label_dict:
+  DFD_fake: 1
+  DFD_real: 0
+  FF-SH: 1
+  FF-F2F: 1
+  FF-DF: 1
+  FF-FS: 1
+  FF-NT: 1
+  FF-FH: 1
+  FF-real: 0
+  CelebDFv1_real: 0
+  CelebDFv1_fake: 1
+  CelebDFv2_real: 0
+  CelebDFv2_fake: 1
+  DFDCP_Real: 0
+  DFDCP_FakeA: 1
+  DFDCP_FakeB: 1
+  DFDC_Fake: 1
+  DFDC_Real: 0
+  DF_fake: 1
+  DF_real: 0
+  UADFV_Fake: 1
+  UADFV_Real: 0
+  roop_Real: 0
+  roop_Fake: 1
+  OpenForensics_real: 0
+  OpenForensics_fake: 1
+
+local_rank: 0
+ddp: false

@@ -1,0 +1,22 @@
+{
+  "typeCheckingMode": "off",
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+    ".venv",
+    ".vscode",
+    "venv",
+    "deepfake_env",
+    "training",
+    "preprocessing",
+    "analysis",
+    "datasets",
+    "figures",
+    "logs",
+    "frontend"
+  ],
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "reportGeneralTypeIssues": false
+}
