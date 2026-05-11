@@ -26,8 +26,7 @@ def build_model(model_name='ir_50'):
         raise ValueError('not a correct model name', model_name)
 
 def initialize_weights(modules):
-\
-       
+    
     for m in modules:
         if isinstance(m, nn.Conv2d):
             nn.init.kaiming_normal_(m.weight,
@@ -47,15 +46,13 @@ def initialize_weights(modules):
 
 
 class Flatten(Module):
-\
-       
+    
     def forward(self, input):
         return input.view(input.size(0), -1)
 
 
 class LinearBlock(Module):
-\
-       
+    
     def __init__(self, in_c, out_c, kernel=(1, 1), stride=(1, 1), padding=(0, 0), groups=1):
         super(LinearBlock, self).__init__()
         self.conv = Conv2d(in_c, out_c, kernel, stride, padding, groups=groups, bias=False)
@@ -68,8 +65,7 @@ class LinearBlock(Module):
 
 
 class GNAP(Module):
-\
-       
+    
     def __init__(self, in_c):
         super(GNAP, self).__init__()
         self.bn1 = BatchNorm2d(in_c, affine=False)
@@ -89,8 +85,7 @@ class GNAP(Module):
 
 
 class GDC(Module):
-\
-       
+    
     def __init__(self, in_c, embedding_size):
         super(GDC, self).__init__()
         self.conv_6_dw = LinearBlock(in_c, in_c,
@@ -111,8 +106,7 @@ class GDC(Module):
 
 
 class SEModule(Module):
-\
-       
+    
     def __init__(self, channels, reduction):
         super(SEModule, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
@@ -140,8 +134,7 @@ class SEModule(Module):
 
 
 class BasicBlockIR(Module):
-\
-       
+    
     def __init__(self, in_channel, depth, stride):
         super(BasicBlockIR, self).__init__()
         if in_channel == depth:
@@ -166,8 +159,7 @@ class BasicBlockIR(Module):
 
 
 class BottleneckIR(Module):
-\
-       
+    
     def __init__(self, in_channel, depth, stride):
         super(BottleneckIR, self).__init__()
         reduction_channel = depth // 4
@@ -266,11 +258,7 @@ def get_blocks(num_layers):
 
 class Backbone(Module):
     def __init__(self, input_size, num_layers, mode='ir'):
-\
-\
-\
-\
-           
+        
         super(Backbone, self).__init__()
         assert input_size[0] in [112, 224],\
             "input_size should be [112, 112] or [224, 224]"
@@ -318,8 +306,6 @@ class Backbone(Module):
 
     def forward(self, x):
         
-                                                    
-                                                                                                        
         x = self.input_layer(x)
 
         for idx, module in enumerate(self.body):
