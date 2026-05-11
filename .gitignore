@@ -36,3 +36,19 @@ Dockerfile
 *.ipynb_checkpoints/
 *.DS_Store
 Thumbs.db
+
+# Project cleanup: exclude large or third-party folders that aren't needed on GitHub
+analysis/
+training/lib/
+training/pretrained/
+training/weights/
+training/dataset/library/
+training/detectors/utils/slowfast/
+preprocessing/dataset_json/
+datasets/
+demo_assets/
+figures/
+logs/
+.venv/
+frontend/node_modules/
+frontend/dist/
