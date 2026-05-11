@@ -1,7 +1,3 @@
-'''
-The code is specifically designed for generating nearest sample pairs for Face X-ray.
-'''
-
 import os
 import json
 import pickle

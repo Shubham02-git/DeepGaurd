@@ -1,7 +1,3 @@
-'''
-The code is designed for scenarios such as disentanglement-based methods where it is necessary to ensure an equal number of positive and negative samples.
-'''
-
 import torch
 import random
 import numpy as np

@@ -1,5 +1,5 @@
 """
-FastAPI Inference Server for DeepfakeBench
+FastAPI Inference Server for DeepGuard
 Exposes a REST API endpoint to detect real/fake images and videos.
 Supports multiple models: xception (default), ucf, efficientnetb4.
 Auto-discovers the latest DFD-trained checkpoint from logs/training/.

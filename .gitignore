@@ -27,9 +27,12 @@ figures/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+preprocessing/dataset_json/Train_poly.json
 demo_whitelist.txt
 exclude.txt
 test_report.txt
+QUICKSTART.md
+Dockerfile
 *.ipynb_checkpoints/
 *.DS_Store
 Thumbs.db

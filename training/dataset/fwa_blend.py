@@ -1,8 +1,3 @@
-'''
-The code is designed for FWA and mainly modified from the below link:
-https://github.com/yuezunli/DSP-FWA
-'''
-
 import os
 import sys
 import json

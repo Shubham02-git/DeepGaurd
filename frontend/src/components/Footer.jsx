@@ -14,7 +14,7 @@ export default function Footer() {
           <Shield size={14} style={{ color: '#a855f7' }} />
           <span>DeepGuard — Deepfake Detection</span>
         </div>
-        <p>Built on <span className="text-white/40">DeepfakeBench</span> · Xception · EfficientNetB4 · DFD</p>
+        <p><span className="text-white/40">Xception · EfficientNetB4 · DFD</span></p>
         <p>For research purposes only</p>
       </div>
     </motion.footer>

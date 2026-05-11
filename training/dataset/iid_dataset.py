@@ -1,6 +1,3 @@
-'''
-The code is designed for scenarios such as disentanglement-based methods where it is necessary to ensure an equal number of positive and negative samples.
-'''
 import os.path
 from copy import deepcopy
 import cv2

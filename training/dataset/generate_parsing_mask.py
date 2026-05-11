@@ -1,7 +1,3 @@
-'''
-The code is designed for self-blending method (SBI, CVPR 2024).
-'''
-
 import sys
 sys.path.append('.')
 

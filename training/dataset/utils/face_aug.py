@@ -1,8 +1,3 @@
-"""
-Exposing DeepFake Videos By Detecting Face Warping Artifacts
-Yuezun Li, Siwei Lyu
-https://arxiv.org/abs/1811.00656
-"""
 import cv2
 import numpy as np
 from PIL import Image, ImageEnhance

@@ -23,7 +23,7 @@
 
 DeepGuard is an **AI-powered deepfake detection system**. Users upload an image or video through a web interface. The system runs the file through a trained neural network and returns a verdict: **Real** or **Fake**, with a confidence percentage.
 
-It is built on top of the DeepfakeBench academic benchmark framework and trained on the **Deep Fake Detection (DFD)** dataset — a dataset of 3,431 real and AI-manipulated face videos.
+It is trained on the **Deep Fake Detection (DFD)** dataset — a dataset of 3,431 real and AI-manipulated face videos.
 
 ---
 
@@ -175,7 +175,6 @@ User uploads file (browser)
 - Scans all extracted frame folders
 - Splits 80% train / 10% val / 10% test (random, seeded)
 - Writes `DFD.json` — a lookup table mapping video name → list of frame paths
-- Format used by DeepfakeBench's DataLoader at training time
 
 ### Step 3 — Data Augmentation (at training time)
 Applied to training frames only:
@@ -625,7 +624,3 @@ Step 8  REACT FRONTEND (ResultCard.jsx)
 ```
 
 **Total latency (GPU):** ~50–200ms for images, ~500ms–2s for videos
-
----
-
-*Built on DeepfakeBench — an open-source deepfake detection benchmark.*

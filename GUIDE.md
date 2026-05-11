@@ -18,7 +18,7 @@
 
 ## 1. Project Overview
 
-DeepGuard is a deepfake detection system built on the DeepfakeBench framework.
+DeepGuard is a deepfake detection system for AI-powered fake media detection.
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
@@ -281,7 +281,7 @@ Place these files in `training/pretrained/pretrained/`:
 - `efficientnet-b4-6ed6700e.pth` — downloaded automatically by `efficientnet_pytorch`
 
 Place this file in `training/pretrained/`:
-- `I3D_8x8_R50.pth` — download from the DeepfakeBench model releases page
+- `I3D_8x8_R50.pth` — download from official model repository
 
 ### Step 6 — Prepare dataset (DFD)
 ```powershell

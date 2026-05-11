@@ -1,8 +1,3 @@
-'''
-Create face mask and face boundary mask according to face landmarks,
-so as to supervize the activation of Conv layer.
-'''
-
 import os
 import numpy as np
 import cv2

@@ -1,16 +1,3 @@
-'''
-Functions in the Class are summarized as:
-1. __init__: Initialization
-2. build_backbone: Backbone-building
-3. build_loss: Loss-function-building
-4. features: Feature-extraction
-5. classifier: Classification
-6. get_losses: Loss-computation
-7. get_train_metrics: Training-metrics-computation
-8. get_test_metrics: Testing-metrics-computation
-9. forward: Forward-propagation
-'''
-
 import os
 import datetime
 import logging
@@ -171,7 +158,9 @@ class IIDDetector(AbstractDetector):
 
 if __name__ == '__main__':
 
-    with open(r'H:\code\DeepfakeBench\training\config\detector\iid_detector.yaml', 'r') as f:
+    # Load config file (update path as needed for your setup)
+    config_path = r'training/config/detector/iid_detector.yaml'
+    with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     if config['manualSeed'] is None:
         config['manualSeed'] = random.randint(1, 10000)

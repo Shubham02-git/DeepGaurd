@@ -1,7 +1,3 @@
-'''
-The code is designed for Face X-ray.
-'''
-
 import os
 import sys
 import json

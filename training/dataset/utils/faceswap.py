@@ -1,9 +1,3 @@
-'''
-code from https://github.com/wuhuikai/FaceSwap/blob/master/face_swap.py
-'''
-
-
-
 #! /usr/bin/env python
 import cv2
 import numpy as np

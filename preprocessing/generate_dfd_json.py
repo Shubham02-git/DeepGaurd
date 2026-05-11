@@ -1,25 +1,3 @@
-"""
-Generates preprocessing/dataset_json/DFD.json for training.
-
-Expected frame structure produced by preprocess_dfd.py:
-  datasets/rgb/Celeb-DF-v2/fake/frames/<video_stem>/<000.png ...>
-  datasets/rgb/Celeb-DF-v2/real/frames/<video_stem>/<000.png ...>
-
-JSON output format (matches abstract_dataset.py expectations):
-{
-  "DFD": {
-    "DFD_fake": {
-      "train": {"video_name": {"label": "DFD_fake", "frames": [...]}, ...},
-      "val":   {...},
-      "test":  {...}
-    },
-    "DFD_real": {
-      "train": {...}, "val": {...}, "test": {...}
-    }
-  }
-}
-"""
-
 import os
 import json
 import random

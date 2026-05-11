@@ -1,16 +1,3 @@
-"""
-Preprocessing script for DFD (DeepFakeDetection) dataset stored as:
-  datasets/rgb/Celeb-DF-v2/fake/DFD_manipulated_sequences/*.mp4
-  datasets/rgb/Celeb-DF-v2/real/DFD_original sequences/*.mp4
-
-Extracts face crops from videos using OpenCV Haar cascade detector,
-saves them as PNG frames under a 'frames/' sibling directory.
-
-Output structure:
-  datasets/rgb/Celeb-DF-v2/fake/frames/<video_stem>/<000.png 001.png ...>
-  datasets/rgb/Celeb-DF-v2/real/frames/<video_stem>/<000.png 001.png ...>
-"""
-
 import os
 import cv2
 import sys
