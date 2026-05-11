@@ -37,6 +37,8 @@ Dockerfile
 *.DS_Store
 Thumbs.db
 
+.gitignore
+
 # Project cleanup: exclude large or third-party folders that aren't needed on GitHub
 analysis/
 training/lib/
