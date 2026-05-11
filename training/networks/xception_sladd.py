@@ -1,6 +1,6 @@
-"""
-
-"""
+\
+\
+   
 import torchvision
 import torch
 import torch.nn as nn
@@ -9,14 +9,14 @@ import torch.utils.model_zoo as model_zoo
 
 from metrics.registry import BACKBONE
 
-# ⚠️ SECURITY: Xception weights URL disabled (unsafe HTTP auto-download)
-# Manual download required for security:
-#   2. Save to: ./pretrained/xception-b5690688.pth
-#   3. Verify hash: certutil -hashfile pretrained/xception-b5690688.pth SHA256
+                                                                        
+                                        
+                                                  
+                                                                              
 pretrained_settings = {
     'xception': {
         'imagenet': {
-            # 'url': 'http://data.lip6.fr/cadene/pretrainedmodels/xception-b5690688.pth',  # DISABLED
+                                                                                                     
             'input_space': 'RGB',
             'input_size': [3, 299, 299],
             'input_range': [0, 1],
@@ -24,7 +24,7 @@ pretrained_settings = {
             'std': [0.5, 0.5, 0.5],
             'num_classes': 1000,
             'scale': 0.8975
-            # The resize parameter of the validation transform should be 333, and make sure to center crop at 299x299
+                                                                                                                     
         }
     }
 }
@@ -72,7 +72,7 @@ class Block(nn.Module):
         rep = []
 
         filters = in_filters
-        if grow_first:  # whether the number of filters grows first
+        if grow_first:                                             
             rep.append(self.relu)
             rep.append(SeparableConv2d(in_filters, out_filters,
                                        3, stride=1, padding=1, bias=False))
@@ -114,29 +114,29 @@ class Block(nn.Module):
 
 @BACKBONE.register_module(module_name="xception_sladd")
 class Xception_SLADD(nn.Module):
-    """
-    Xception optimized for the ImageNet dataset, as specified in
-    https://arxiv.org/pdf/1610.02357.pdf
-    """
+\
+\
+\
+       
 
     def __init__(self, config):
-        """ Constructor
-        Args:
-            num_classes: number of classes
-        """
+\
+\
+\
+           
         super(Xception_SLADD, self).__init__()
         num_classes = config["num_classes"]
         inc = config["inc"]
         dropout = config["dropout"]
 
-        # Entry flow
+                    
         self.conv1 = nn.Conv2d(inc, 32, 3, 2, 0, bias=False)
         self.bn1 = nn.BatchNorm2d(32)
         self.relu = nn.ReLU(inplace=False)
 
         self.conv2 = nn.Conv2d(32, 64, 3, bias=False)
         self.bn2 = nn.BatchNorm2d(64)
-        # do relu here
+                      
 
         self.block1 = Block(
             64, 128, 2, 2, start_with_relu=False, grow_first=True)
@@ -145,7 +145,7 @@ class Xception_SLADD(nn.Module):
         self.block3 = Block(
             256, 728, 2, 2, start_with_relu=True, grow_first=True)
 
-        # middle flow
+                     
         self.block4 = Block(
             728, 728, 3, 1, start_with_relu=True, grow_first=True)
         self.block5 = Block(
@@ -164,14 +164,14 @@ class Xception_SLADD(nn.Module):
         self.block11 = Block(
             728, 728, 3, 1, start_with_relu=True, grow_first=True)
 
-        # Exit flow
+                   
         self.block12 = Block(
             728, 1024, 2, 2, start_with_relu=True, grow_first=False)
 
         self.conv3 = SeparableConv2d(1024, 1536, 3, 1, 1)
         self.bn3 = nn.BatchNorm2d(1536)
 
-        # do relu here
+                      
         self.conv4 = SeparableConv2d(1536, 2048, 3, 1, 1)
         self.bn4 = nn.BatchNorm2d(2048)
         final_channel = 2048
@@ -255,7 +255,7 @@ class Xception_SLADD(nn.Module):
         x = self.fea_part5(x)
         return x,x3
 
-    # def classifier(self, features):
+                                     
     def classifier(self, x):
         x = self.relu(x)
         x = F.adaptive_avg_pool2d(x, (1, 1))
@@ -266,7 +266,7 @@ class Xception_SLADD(nn.Module):
     def estimateMap(self, x):
         return self.map(x)
 
-    # def forward(self, input):
+                               
     def forward(self, x):
         x, x3 = self.features(x)
         out, fea = self.classifier(x)

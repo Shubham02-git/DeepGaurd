@@ -8,11 +8,11 @@ from metrics.registry import LOSSFUNC
 class ConsistencyCos(nn.Module):
     def __init__(self):
         super(ConsistencyCos, self).__init__()
-        # # CrossEntropy Loss
-        # weight=torch.Tensor([4.0, 1.0])
-        # if torch.cuda.is_available():
-        #     weight = weight.cuda()
-        # self.loss_fn = nn.CrossEntropyLoss(weight)
+                             
+                                         
+                                       
+                                    
+                                                    
         self.loss_fn = nn.CrossEntropyLoss()
         self.mse_fn = nn.MSELoss()
 
@@ -29,8 +29,8 @@ class ConsistencyCos(nn.Module):
         loss = self.consistency_rate * self.mse_fn(cos, labels) + self.loss_fn(inputs, targets)
         return loss
 
-#
-##FIXME to be implemented
+ 
+                         
 class ConsistencyL2(nn.Module):
     def __init__(self):
         super(ConsistencyL2, self).__init__()

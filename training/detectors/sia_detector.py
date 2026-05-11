@@ -30,7 +30,7 @@ class SIADetector(AbstractDetector):
         self.att6conv = SAIA_conv(448, kernel_size=3, isspace=False, ischannel=True)
 
         self.avgpool1 = nn.AdaptiveMaxPool2d((32, 32))
-        # self.avgpool1 = nn.AdaptiveAvgPool2d((20,20))#[160]
+                                                             
 
         self.avgpool2 = nn.AdaptiveMaxPool2d((16, 16))
 
@@ -61,15 +61,15 @@ class SIADetector(AbstractDetector):
         self.linear = nn.Linear(num_ftrs, num_classes)
 
     def build_backbone(self, config):
-        # prepare the backbone
+                              
         backbone_class = BACKBONE[config['backbone_name']]
         model_config = config['backbone_config']
         model_config['pretrained'] = self.config.get('pretrained', None)
-        # FIXME: current load pretrained weights only from the backbone, not here
+                                                                                 
         return backbone_class(model_config)
 
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         return loss_class()
 
@@ -88,7 +88,7 @@ class SIADetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         return {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
 
@@ -99,30 +99,30 @@ class SIADetector(AbstractDetector):
         return {'cls': pred, 'prob': prob, 'feat': features}
 
     def extract_features(self, inputs):
-        """use convolution layer to extract feature .
-
-        Args:
-            inputs (tensor): Input tensor.
-
-        Returns:
-            Output of the final convolution
-            layer in the efficientnet model.
-        """
-        # Stem
+\
+\
+\
+\
+\
+\
+\
+\
+           
+              
         x = self.backbone.efficientnet._conv_stem(inputs)
         x = self.backbone.efficientnet._bn0(x)
         x = self.backbone.efficientnet._swish(x)
-        # x = self._swish(self._bn0(self._conv_stem(inputs)))
+                                                             
 
         x = self.backbone.efficientnet._blocks[0](x)
         x = self.backbone.efficientnet._blocks[1](x)
-        # print("Output shape after block 1:", x.shape)
+                                                       
 
         x = self.backbone.efficientnet._blocks[2](x)
         x = self.backbone.efficientnet._blocks[3](x)
         x = self.backbone.efficientnet._blocks[4](x)
         x = self.backbone.efficientnet._blocks[5](x)
-        # print("Output shape after block 5:", x.shape)
+                                                       
 
         x, att1 = self.att1conv(x)
         res12 = self.avgpool1(self.conv1(att1))
@@ -132,7 +132,7 @@ class SIADetector(AbstractDetector):
         x = self.backbone.efficientnet._blocks[7](x)
         x = self.backbone.efficientnet._blocks[8](x)
         x = self.backbone.efficientnet._blocks[9](x)
-        # print("Output shape after block 9:", x.shape)
+                                                       
 
         x, att2 = self.att2conv(x + res12)
         res24 = self.avgpool2(self.conv3(att2))
@@ -143,7 +143,7 @@ class SIADetector(AbstractDetector):
         x = self.backbone.efficientnet._blocks[13](x)
         x = self.backbone.efficientnet._blocks[14](x)
         x = self.backbone.efficientnet._blocks[15](x)
-        # print("Output shape after block 15:", x.shape)
+                                                        
 
         x = self.backbone.efficientnet._blocks[16](x)
         x = self.backbone.efficientnet._blocks[17](x)
@@ -151,7 +151,7 @@ class SIADetector(AbstractDetector):
         x = self.backbone.efficientnet._blocks[19](x)
         x = self.backbone.efficientnet._blocks[20](x)
         x = self.backbone.efficientnet._blocks[21](x)
-        # print("Output shape after block 21:", x.shape)
+                                                        
 
         x, att4 = self.att4conv(x + res24 + res14)
 
@@ -163,20 +163,20 @@ class SIADetector(AbstractDetector):
         x = self.backbone.efficientnet._blocks[27](x)
         x = self.backbone.efficientnet._blocks[28](x)
         x = self.backbone.efficientnet._blocks[29](x)
-        # print("Output shape after block 29:", x.shape)
+                                                        
 
         x = self.backbone.efficientnet._blocks[30](x)
         x = self.backbone.efficientnet._blocks[31](x)
-        # print("Output shape after block 31:", x.shape)
+                                                        
 
-        # for idx, block in enumerate(self.backbone.efficientnet._blocks):
-        #     drop_connect_rate = self.backbone.efficientnet._global_params.drop_connect_rate
-        #     if drop_connect_rate:
-        #         drop_connect_rate *= float(idx) / len(self.backbone.efficientnet._blocks)  # scale drop connect_rate
-        #     x = block(x, drop_connect_rate=drop_connect_rate)
-        # print(idx)
+                                                                          
+                                                                                             
+                                   
+                                                                                                                      
+                                                               
+                    
 
-        # Head
+              
         x = self.backbone.efficientnet._swish(self.backbone.efficientnet._bn1(self.backbone.efficientnet._conv_head(x)))
 
         return x
@@ -205,13 +205,13 @@ class SAIA_conv(nn.Module):
         with torch.no_grad():
             batch_size = x.shape[0]
             num_channel = x.shape[1]
-            # intra-feature
+                           
 
             x1 = F.conv2d(x, self.weight, padding=self.pad, groups=self.outdim)
             x2 = F.conv2d(x, self.weight2, padding=0, groups=self.outdim)
             intra_distance = torch.abs(x2 - x1)
 
-            # inter-feature
+                           
             pad_x = torch.cat([x, x[:, :self.channel_range + 1, :, :]], dim=1)
             distances = []
             for i in range(1, self.channel_range + 1):
@@ -227,7 +227,7 @@ class SAIA_conv(nn.Module):
         if self.ischannel:
             distance_channel = att[:]
             distance_channel = torch.exp(
-                -distance_channel / distance_channel.mean() / 2 / self.band_width ** 2)  # using mean of distance to normalize
+                -distance_channel / distance_channel.mean() / 2 / self.band_width ** 2)                                       
             distance_channel = -torch.log(distance_channel + 0.1)
             channel_attention = torch.mean(distance_channel.view(batch_size, self.outdim, -1), dim=2)
             channel_attention = channel_attention.view(batch_size, -1, 1, 1) + 1

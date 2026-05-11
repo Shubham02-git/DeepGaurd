@@ -53,7 +53,7 @@ class LRLDetector(AbstractDetector):
         )
         
     def build_backbone(self, config):
-        # prepare the backbone
+                              
         backbone_class = BACKBONE[config['backbone_name']]
         model_config = config['backbone_config']
         model_config['pretrained'] = self.config['pretrained']
@@ -65,7 +65,7 @@ class LRLDetector(AbstractDetector):
         return backbone
     
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         loss_func = loss_class()
         self.seg_loss = nn.BCELoss()
@@ -76,21 +76,21 @@ class LRLDetector(AbstractDetector):
         rgb=data_dict['image']
         idct=data_dict['idct']
 
-        #torch.Size([b, 56, 32, 32])
+                                    
         rgb1=self.encoder_rgb.block_part1(rgb)
         idct1=self.encoder_idct.block_part1(idct)
 
         rgb1, idct1 = self.rfam1(rgb1, idct1)
         featuremap_low = rgb1 + idct1
 
-        #torch.Size([b, 160, 16, 16])
+                                     
         rgb2=self.encoder_rgb.block_part2(rgb1)
         idct2=self.encoder_idct.block_part2(idct1)
 
         rgb2, idct2 = self.rfam2(rgb2, idct2)
         featuremap_mid = rgb2 + idct2
 
-        #torch.Size([b, 1792, 8, 8])
+                                    
         rgb3=self.encoder_rgb.block_part3(rgb2)
         idct3=self.encoder_idct.block_part3(idct2)
 
@@ -134,45 +134,45 @@ class LRLDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = torch.ceil(data_dict['label'].clamp(max=1).float()).long()
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         metric_batch_dict = {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
         return metric_batch_dict
 
     def feature_process(self,feature):
-        w = F.unfold(feature, kernel_size=2, stride=2, padding=0).permute(0, 2, 1) # (2008,8,8) to (16,8032), that is, 4*4 and flatten
+        w = F.unfold(feature, kernel_size=2, stride=2, padding=0).permute(0, 2, 1)                                                    
         w_normed = w / (w * w).sum(dim=2, keepdim=True).sqrt()
         B, K = w.shape[:2]
-        sim = torch.einsum('bij,bjk->bik', w_normed, w_normed.permute(0, 2, 1)) # cross-similarity (16,16)
+        sim = torch.einsum('bij,bjk->bik', w_normed, w_normed.permute(0, 2, 1))                           
         sim = (sim + 1) / 2
         mask = (torch.eye(K) != 1).repeat(B, 1).view(B, K, K).cuda()
-        sim_mask = torch.masked_select(sim, mask).view(B, K, -1) # remove self-similarity
+        sim_mask = torch.masked_select(sim, mask).view(B, K, -1)                         
         x = sim_mask.view(B, -1)
         return x,sim
 
     def forward(self, data_dict: dict, inference=False) -> dict:
 
-        # get the features by backbone
+                                      
         features = self.features(data_dict)
 
         features_processed,sim = self.feature_process(features)
-        # get the prediction by classifier
+                                          
         pred_raw = self.classifier(features_processed)
 
         encoder_results = [features]
         mask = self.final(self.decoder(encoder_results))
         mask = torch.sigmoid(mask)
-        # get the probability of the pred
+                                         
         if pred_raw.size(1)>2:
             pred=torch.stack([pred_raw[:, 0], torch.sum(pred_raw[:, 1:], dim=1)], dim=1)
         else:
             pred=pred_raw
         prob = torch.softmax(pred, dim=1)[:, 1]
-        # build the prediction dict for each output
+                                                   
         pred_dict = {'cls': pred_raw, 'prob': prob, 'feat': features, 'mask_pred': mask, 'sim': sim}
         return pred_dict
-        # else:
-        #     return pred
+               
+                         
     
 
 class DecoderBlock(nn.Module):
@@ -283,7 +283,7 @@ if __name__ == '__main__':
     config['with_landmark']=True
     config['use_data_augmentation']=True
     train_set = LRLDataset(config=config, mode='train')
-    train_data_loader = \
+    train_data_loader =\
         torch.utils.data.DataLoader(
             dataset=train_set,
             batch_size=2,

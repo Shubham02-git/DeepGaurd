@@ -31,7 +31,7 @@ class FFDDetector(AbstractDetector):
         self.backbone = self.build_backbone(config)
         self.loss_func = self.build_loss(config)
 
-        # model
+               
         templates = get_templates()
         maptype = config['maptype']
         if maptype == 'none':
@@ -46,11 +46,11 @@ class FFDDetector(AbstractDetector):
             print('Unknown map type: `{0}`'.format(maptype))
 
     def build_backbone(self, config):
-        # prepare the backbone
+                              
         backbone_class = BACKBONE[config['backbone_name']]
         model_config = config['backbone_config']
         backbone = backbone_class(model_config)
-        # if donot load the pretrained weights, fail to get good results
+                                                                        
         state_dict = torch.load(config['pretrained'])
         for name, weights in state_dict.items():
             if 'pointwise' in name:
@@ -61,7 +61,7 @@ class FFDDetector(AbstractDetector):
         return backbone
 
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         cls_loss_class = LOSSFUNC[config['loss_func']['cls_loss']]
         mask_loss_class = LOSSFUNC[config['loss_func']['mask_loss']]
         cls_loss_func = cls_loss_class()
@@ -70,13 +70,13 @@ class FFDDetector(AbstractDetector):
         return loss_func
 
     def features(self, data_dict: dict) -> torch.Tensor:
-        # Pass the input through the Xception backbone
+                                                      
         x = self.backbone.fea_part1(data_dict['image'])
         x = self.backbone.fea_part2(x)
-        x = self.backbone.fea_part3(x)  # This ends at block7 in the backbone
-        mask, vec = self.map(x)  # Compute the mask here
-        x = x * mask  # Apply the mask
-        x = self.backbone.fea_part4(x)  # Continue with the rest of the backbone
+        x = self.backbone.fea_part3(x)                                       
+        mask, vec = self.map(x)                         
+        x = x * mask                  
+        x = self.backbone.fea_part4(x)                                          
         x = self.backbone.fea_part5(x)
         return x, mask, vec
 
@@ -84,22 +84,22 @@ class FFDDetector(AbstractDetector):
         return self.backbone.classifier(features)
     
     def get_losses(self, data_dict: dict, pred_dict: dict) -> dict:
-        # label
+               
         label = data_dict['label']
         mask_gt = data_dict['mask'] if data_dict['mask'] is not None else None
-        # pred
+              
         pred_cls = pred_dict['cls']
         pred_mask = pred_dict['mask_pred'] if data_dict['mask'] is not None else None
-        # loss
+              
         loss_cls = self.loss_func['cls'](pred_cls, label)
         if data_dict['mask'] is not None:
-            # Move tensors to the same device
+                                             
             mask_gt = mask_gt.to(pred_mask.device)
             loss_mask = self.loss_func['mask'](pred_mask, mask_gt)
-            # follow the original paper, 
+                                         
             loss = loss_cls + loss_mask
             loss_dict = {'overall': loss, 'mask': loss_mask, 'cls': loss_cls}
-        else:  # mask_gt is none (during the testing or inference)
+        else:                                                     
             loss = loss_cls
             loss_dict = {'overall': loss, 'cls': loss_cls}
         return loss_dict
@@ -107,19 +107,19 @@ class FFDDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         metric_batch_dict = {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
         return metric_batch_dict
 
     def forward(self, data_dict: dict, inference=False) -> dict:
-        # get the features by backbone
+                                      
         features, mask, vec = self.features(data_dict)
-        # get the prediction by classifier
+                                          
         pred = self.classifier(features)
-        # get the probability of the pred
+                                         
         prob = torch.softmax(pred, dim=1)[:, 1]
-        # build the prediction dict for each output
+                                                   
         pred_dict = {'cls': pred, 'prob': prob, 'feat': features, 'mask': mask, 'vec': vec}
 
         return pred_dict

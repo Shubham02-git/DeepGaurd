@@ -57,17 +57,17 @@ class AltFreezingDetector(AbstractDetector):
             print(f"loading pretrained model from {config['pretrained']}")
             pretrained_weights = torch.load(config['pretrained'], map_location='cpu', encoding='latin1')
             modified_weights = {k.replace("resnet.", ""): v for k, v in pretrained_weights.items()}
-            # fit from 400 num_classes to 1
+                                           
             modified_weights["head.projection.weight"] = modified_weights["head.projection.weight"][:1, :]
             modified_weights["head.projection.bias"] = modified_weights["head.projection.bias"][:1]
-            # load final ckpt
+                             
             self.resnet.load_state_dict(modified_weights, strict=True)
 
         self.conv_dict = self.find_conv_layers(self.resnet)
         print(f"1x3x3 Conv: {self.conv_dict['spatial']}\n3x1x1 Conv:{self.conv_dict['temporal']}")
         self.train_batch_cnt = 0
 
-        self.loss_func = nn.BCELoss()  # The output of the model is a probability value between 0 and 1 (haved used sigmoid)
+        self.loss_func = nn.BCELoss()                                                                                       
 
     def find_conv_layers(self, module, parent_name='', conv_dict=None):
         if conv_dict is None:
@@ -104,7 +104,7 @@ class AltFreezingDetector(AbstractDetector):
         pass
     
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         return loss_class()
     
@@ -127,14 +127,14 @@ class AltFreezingDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         return {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
 
     def forward(self, data_dict: dict, inference=False) -> dict:
-        # get the probability
+                             
         prob = self.features(data_dict)
-        # build the prediction dict for each output
+                                                   
         pred_dict = {'cls': prob, 'prob': prob, 'feat': prob}
         if not inference:
             if self.train_batch_cnt % (20 + 1) == 0:

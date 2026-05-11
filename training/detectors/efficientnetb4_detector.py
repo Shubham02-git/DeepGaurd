@@ -32,7 +32,7 @@ class EfficientDetector(AbstractDetector):
         self.loss_func = self.build_loss(config)
         
     def build_backbone(self, config):
-        # prepare the backbone
+                              
         backbone_class = BACKBONE[config['backbone_name']]
         model_config = config['backbone_config']
         model_config['pretrained'] = self.config['pretrained']
@@ -45,7 +45,7 @@ class EfficientDetector(AbstractDetector):
         return backbone
     
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         loss_func = loss_class()
         return loss_func
@@ -67,19 +67,19 @@ class EfficientDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         metric_batch_dict = {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
         return metric_batch_dict
 
     def forward(self, data_dict: dict, inference=False) -> dict:
-        # get the features by backbone
+                                      
         features = self.features(data_dict)
-        # get the prediction by classifier
+                                          
         pred = self.classifier(features)
-        # get the probability of the pred
+                                         
         prob = torch.softmax(pred, dim=1)[:, 1]
-        # build the prediction dict for each output
+                                                   
         pred_dict = {'cls': pred, 'prob': prob, 'feat': features}
 
         return pred_dict

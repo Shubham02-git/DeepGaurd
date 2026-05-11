@@ -1,6 +1,6 @@
-'''
-The code is for ResNet34 backbone.
-'''
+\
+\
+   
 
 import os
 import logging
@@ -25,9 +25,9 @@ class ResNet34(nn.Module):
         inc = resnet_config["inc"]
         self.mode = resnet_config["mode"]
 
-        # Define layers of the backbone
-        resnet = torchvision.models.resnet34(pretrained=True)  # FIXME: download the pretrained weights from online
-        # resnet.conv1 = nn.Conv2d(inc, 64, kernel_size=7, stride=2, padding=3, bias=False)
+                                       
+        resnet = torchvision.models.resnet34(pretrained=True)                                                      
+                                                                                           
         self.resnet = torch.nn.Sequential(*list(resnet.children())[:-2])
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512, self.num_classes)

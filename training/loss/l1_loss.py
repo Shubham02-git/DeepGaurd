@@ -10,10 +10,10 @@ class L1Loss(AbstractLossClass):
         self.loss_fn = nn.L1Loss()
 
     def forward(self, inputs, targets):
-        """
-        Computes the l1 loss.
-        """
-        # Compute the l1 loss
+\
+\
+           
+                             
         loss = self.loss_fn(inputs, targets)
 
         return loss

@@ -39,7 +39,7 @@ parser.add_argument('--detector_path', type=str,
 parser.add_argument("--test_dataset", nargs="+")
 parser.add_argument('--weights_path', type=str, 
                     default='/mntcephfs/lab_data/zhiyuanyan/benchmark_results/auc_draw/cnn_aug/resnet34_2023-05-20-16-57-22/test/FaceForensics++/ckpt_epoch_9_best.pth')
-#parser.add_argument("--lmdb", action='store_true', default=False)
+                                                                  
 args = parser.parse_args()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -55,14 +55,14 @@ def init_seed(config):
 
 def prepare_testing_data(config):
     def get_test_data_loader(config, test_name):
-        # update the config dictionary with the specific testing dataset
-        config = config.copy()  # create a copy of config to avoid altering the original one
-        config['test_dataset'] = test_name  # specify the current test dataset
+                                                                        
+        config = config.copy()                                                              
+        config['test_dataset'] = test_name                                    
         test_set = DeepfakeAbstractBaseDataset(
                 config=config,
                 mode='test', 
             )
-        test_data_loader = \
+        test_data_loader =\
             torch.utils.data.DataLoader(
                 dataset=test_set, 
                 batch_size=config['test_batchSize'],
@@ -91,18 +91,18 @@ def test_one_dataset(model, data_loader):
     feature_lists = []
     label_lists = []
     for i, data_dict in tqdm(enumerate(data_loader), total=len(data_loader)):
-        # get data
-        data, label, mask, landmark = \
+                  
+        data, label, mask, landmark =\
         data_dict['image'], data_dict['label'], data_dict['mask'], data_dict['landmark']
         label = torch.where(data_dict['label'] != 0, 1, 0)
-        # move data to GPU
+                          
         data_dict['image'], data_dict['label'] = data.to(device), label.to(device)
         if mask is not None:
             data_dict['mask'] = mask.to(device)
         if landmark is not None:
             data_dict['landmark'] = landmark.to(device)
 
-        # model forward without considering gradient computation
+                                                                
         predictions = inference(model, data_dict)
         label_lists += list(data_dict['label'].cpu().detach().numpy())
         prediction_lists += list(predictions['prob'].cpu().detach().numpy())
@@ -111,25 +111,25 @@ def test_one_dataset(model, data_loader):
     return np.array(prediction_lists), np.array(label_lists),np.array(feature_lists)
     
 def test_epoch(model, test_data_loaders):
-    # set model to eval mode
+                            
     model.eval()
 
-    # define test recorder
+                          
     metrics_all_datasets = {}
 
-    # testing for all test data
+                               
     keys = test_data_loaders.keys()
     for key in keys:
         data_dict = test_data_loaders[key].dataset.data_dict
-        # compute loss for each dataset
+                                       
         predictions_nps, label_nps,feat_nps = test_one_dataset(model, test_data_loaders[key])
         
-        # compute metric for each dataset
+                                         
         metric_one_dataset = get_test_metrics(y_pred=predictions_nps, y_true=label_nps,
                                               img_names=data_dict['image'])
         metrics_all_datasets[key] = metric_one_dataset
         
-        # info for each dataset
+                               
         tqdm.write(f"dataset: {key}")
         for k, v in metric_one_dataset.items():
             tqdm.write(f"{k}: {v}")
@@ -143,7 +143,7 @@ def inference(model, data_dict):
 
 
 def main():
-    # parse options and load config
+                                   
     with open(args.detector_path, 'r') as f:
         config = yaml.safe_load(f)
     with open('./training/config/test_config.yaml', 'r') as f:
@@ -152,24 +152,24 @@ def main():
     if 'label_dict' in config:
         config2['label_dict']=config['label_dict']
     weights_path = None
-    # If arguments are provided, they will overwrite the yaml settings
+                                                                      
     if args.test_dataset:
         config['test_dataset'] = args.test_dataset
     if args.weights_path:
         config['weights_path'] = args.weights_path
         weights_path = args.weights_path
     
-    # init seed
+               
     init_seed(config)
 
-    # set cudnn benchmark if needed
+                                   
     if config['cudnn']:
         cudnn.benchmark = True
 
-    # prepare the testing data loader
+                                     
     test_data_loaders = prepare_testing_data(config)
     
-    # prepare the model (detector)
+                                  
     model_class = DETECTOR[config['model_name']]
     model = model_class(config).to(device)
     epoch = 0
@@ -184,7 +184,7 @@ def main():
     else:
         print('Fail to load the pre-trained weights')
     
-    # start testing
+                   
     best_metric = test_epoch(model, test_data_loaders)
     print('===> Test Done!')
 

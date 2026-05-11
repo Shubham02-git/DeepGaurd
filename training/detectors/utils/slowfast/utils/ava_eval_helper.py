@@ -1,27 +1,27 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-##############################################################################
-#
-# Based on:
-# --------------------------------------------------------
-# ActivityNet
-# Copyright (c) 2015 ActivityNet
-# Licensed under The MIT License
-# [see https://github.com/activitynet/ActivityNet/blob/master/LICENSE for details]
-# --------------------------------------------------------
+                                                  
+ 
+                                                                 
+                                                                  
+                                         
+ 
+                                                
+ 
+                                                                     
+                                                                   
+                                                                          
+                                                                     
+                                
+                                                                              
+ 
+           
+                                                          
+             
+                                
+                                
+                                                                                  
+                                                          
 
-"""Helper functions for AVA evaluation."""
+                                          
 
 from __future__ import (
     absolute_import,
@@ -46,26 +46,26 @@ logger = logging.getLogger(__name__)
 
 
 def make_image_key(video_id, timestamp):
-    """Returns a unique identifier for a video id & timestamp."""
+                                                                 
     return "%s,%04d" % (video_id, int(timestamp))
 
 
 def read_csv(csv_file, class_whitelist=None, load_score=False):
-    """Loads boxes and class labels from a CSV file in the AVA format.
-    CSV file format described at https://research.google.com/ava/download.html.
-    Args:
-      csv_file: A file object.
-      class_whitelist: If provided, boxes corresponding to (integer) class labels
-        not in this set are skipped.
-    Returns:
-      boxes: A dictionary mapping each unique image key (string) to a list of
-        boxes, given as coordinates [y1, x1, y2, x2].
-      labels: A dictionary mapping each unique image key (string) to a list of
-        integer class lables, matching the corresponding box in `boxes`.
-      scores: A dictionary mapping each unique image key (string) to a list of
-        score values lables, matching the corresponding label in `labels`. If
-        scores are not provided in the csv, then they will default to 1.0.
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
     boxes = defaultdict(list)
     labels = defaultdict(list)
     scores = defaultdict(list)
@@ -88,13 +88,13 @@ def read_csv(csv_file, class_whitelist=None, load_score=False):
 
 
 def read_exclusions(exclusions_file):
-    """Reads a CSV file of excluded timestamps.
-    Args:
-      exclusions_file: A file object containing a csv of video-id,timestamp.
-    Returns:
-      A set of strings containing excluded image keys, e.g. "aaaaaaaaaaa,0904",
-      or an empty set if exclusions file is None.
-    """
+\
+\
+\
+\
+\
+\
+       
     excluded = set()
     if exclusions_file:
         with PathManager.open(exclusions_file, "r") as f:
@@ -106,7 +106,7 @@ def read_exclusions(exclusions_file):
 
 
 def read_labelmap(labelmap_file):
-    """Read label map and class ids."""
+                                       
 
     labelmap = []
     class_ids = set()
@@ -124,7 +124,7 @@ def read_labelmap(labelmap_file):
 
 
 def evaluate_ava_from_files(labelmap, groundtruth, detections, exclusions):
-    """Run AVA evaluation given annotation/prediction files."""
+                                                               
 
     categories, class_whitelist = read_labelmap(labelmap)
     excluded_keys = read_exclusions(exclusions)
@@ -144,7 +144,7 @@ def evaluate_ava(
     video_idx_to_name=None,
     name="latest",
 ):
-    """Run AVA evaluation given numpy arrays."""
+                                                
 
     eval_start = time.time()
 
@@ -173,7 +173,7 @@ def evaluate_ava(
 def run_evaluation(
     categories, groundtruth, detections, excluded_keys, verbose=True
 ):
-    """AVA evaluation main logic."""
+                                    
 
     pascal_evaluator = object_detection_evaluation.PascalDetectionEvaluator(
         categories
@@ -254,10 +254,10 @@ def get_ava_eval_data(
     verbose=False,
     video_idx_to_name=None,
 ):
-    """
-    Convert our data format into the data format used in official AVA
-    evaluation.
-    """
+\
+\
+\
+       
 
     out_scores = defaultdict(list)
     out_labels = defaultdict(list)
@@ -271,7 +271,7 @@ def get_ava_eval_data(
 
         key = video + "," + "%04d" % (sec)
         batch_box = boxes[i].tolist()
-        # The first is batch idx.
+                                 
         batch_box = [batch_box[j] for j in [0, 2, 1, 4, 3]]
 
         one_scores = scores[i].tolist()
@@ -286,7 +286,7 @@ def get_ava_eval_data(
 
 
 def write_results(detections, filename):
-    """Write prediction results into official formats."""
+                                                         
     start = time.time()
 
     boxes, labels, scores = detections

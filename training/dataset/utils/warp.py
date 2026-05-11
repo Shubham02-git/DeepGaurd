@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-# from core import randomex
+                           
 
 
 def random_normal(size=(1,), trunc_val=2.5):
@@ -27,7 +27,7 @@ def gen_warp_params(w, flip, rotation_range=[-10, 10], scale_range=[-0.5, 0.5], 
     ty = rnd_state.uniform(ty_range[0], ty_range[1])
     p_flip = flip and rnd_state.randint(10) < 4
 
-    # random warp by grid
+                         
     cell_size = [w // (2**i) for i in range(1, 4)][rnd_state.randint(3)]
     cell_count = w // cell_size + 1
 
@@ -35,10 +35,10 @@ def gen_warp_params(w, flip, rotation_range=[-10, 10], scale_range=[-0.5, 0.5], 
     mapx = np.broadcast_to(grid_points, (cell_count, cell_count)).copy()
     mapy = mapx.T
 
-    mapx[1:-1, 1:-1] = mapx[1:-1, 1:-1] + \
+    mapx[1:-1, 1:-1] = mapx[1:-1, 1:-1] +\
         random_normal(
             size=(cell_count-2, cell_count-2))*(cell_size*0.24)
-    mapy[1:-1, 1:-1] = mapy[1:-1, 1:-1] + \
+    mapy[1:-1, 1:-1] = mapy[1:-1, 1:-1] +\
         random_normal(
             size=(cell_count-2, cell_count-2))*(cell_size*0.24)
 
@@ -49,7 +49,7 @@ def gen_warp_params(w, flip, rotation_range=[-10, 10], scale_range=[-0.5, 0.5], 
     mapy = cv2.resize(mapy, (w+cell_size,)*2)[
         half_cell_size:-half_cell_size-1, half_cell_size:-half_cell_size-1].astype(np.float32)
 
-    # random transform
+                      
     random_transform_mat = cv2.getRotationMatrix2D(
         (w // 2, w // 2), rotation, scale)
     random_transform_mat[:, 2] += (tx*w, ty*w)
@@ -89,8 +89,8 @@ def random_deform(imageSize, nrows, ncols, mean=0, std=5):
     anchors = np.vstack([rows.flat, cols.flat]).T
     assert anchors.shape[1] == 2 and anchors.shape[0] == ncols * nrows
     deformed = anchors + np.random.normal(mean, std, size=anchors.shape)
-    #print(anchors)
-    #print(deformed)
+                   
+                    
     np.clip(deformed[:,0], 0, h-1, deformed[:,0])
     np.clip(deformed[:,1], 0, w-1, deformed[:,1])
     return anchors.astype(np.float32), deformed.astype(np.float32)
@@ -99,9 +99,9 @@ def random_deform(imageSize, nrows, ncols, mean=0, std=5):
 def piecewise_affine_transform(image, srcAnchor, tgtAnchor):
     trans = PiecewiseAffineTransform()
     trans.estimate(srcAnchor, tgtAnchor)
-    # tform.estimate(from_.astype(np.float32), to_.astype(
-    #     np.float32))  # tform.estimate(from_, to_)
-    # M = tform.params[0:2, :]
+                                                          
+                                                    
+                              
     warped = warp(image, trans)
     return warped
 

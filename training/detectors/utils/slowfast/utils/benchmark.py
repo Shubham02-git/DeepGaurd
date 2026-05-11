@@ -1,7 +1,7 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
-"""
-Functions for benchmarks.
-"""
+                                                                      
+\
+\
+   
 
 import numpy as np
 import pprint
@@ -18,23 +18,23 @@ logger = logging.get_logger(__name__)
 
 
 def benchmark_data_loading(cfg):
-    """
-    Benchmark the speed of data loading in PySlowFast.
-    Args:
-
-        cfg (CfgNode): configs. Details can be found in
-            slowfast/config/defaults.py
-    """
-    # Set up environment.
+\
+\
+\
+\
+\
+\
+       
+                         
     setup_environment()
-    # Set random seed from configs.
+                                   
     np.random.seed(cfg.RNG_SEED)
     torch.manual_seed(cfg.RNG_SEED)
 
-    # Setup logging format.
+                           
     logging.setup_logging(cfg.OUTPUT_DIR)
 
-    # Print config.
+                   
     logger.info("Benchmark data loading with config:")
     logger.info(pprint.pformat(cfg))
 
@@ -43,11 +43,11 @@ def benchmark_data_loading(cfg):
     logger.info(
         "Initialize loader using {:.2f} seconds.".format(timer.seconds())
     )
-    # Total batch size across different machines.
+                                                 
     batch_size = cfg.TRAIN.BATCH_SIZE * cfg.NUM_SHARDS
     log_period = cfg.BENCHMARK.LOG_PERIOD
     epoch_times = []
-    # Test for a few epochs.
+                            
     for cur_epoch in range(cfg.BENCHMARK.NUM_EPOCHS):
         timer = Timer()
         timer_epoch = Timer()

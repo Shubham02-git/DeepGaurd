@@ -8,19 +8,19 @@ from scipy.sparse.linalg import spsolve
 
 
 def color_transfer_sot(src, trg, steps=10, batch_size=5, reg_sigmaXY=16.0, reg_sigmaV=5.0):
-    """
-    Color Transform via Sliced Optimal Transfer
-    ported by @iperov from https://github.com/dcoeurjo/OTColorTransfer
-
-    src         - any float range any channel image
-    dst         - any float range any channel image, same shape as src
-    steps       - number of solver steps
-    batch_size  - solver batch size
-    reg_sigmaXY - apply regularization and sigmaXY of filter, otherwise set to 0.0
-    reg_sigmaV  - sigmaV of filter
-
-    return value - clip it manually
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
     if not np.issubdtype(src.dtype, np.floating):
         raise ValueError("src value must be float")
     if not np.issubdtype(trg.dtype, np.floating):
@@ -187,46 +187,46 @@ def seamless_clone(source, target, mask):
 
 
 def reinhard_color_transfer(target, source, clip=False, preserve_paper=False, source_mask=None, target_mask=None):
-    """
-    Transfers the color distribution from the source to the target
-    image using the mean and standard deviations of the L*a*b*
-    color space.
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
-    This implementation is (loosely) based on to the "Color Transfer
-    between Images" paper by Reinhard et al., 2001.
-
-    Parameters:
-    -------
-    source: NumPy array
-            OpenCV image in BGR color space (the source image)
-    target: NumPy array
-            OpenCV image in BGR color space (the target image)
-    clip: Should components of L*a*b* image be scaled by np.clip before
-            converting back to BGR color space?
-            If False then components will be min-max scaled appropriately.
-            Clipping will keep target image brightness truer to the input.
-            Scaling will adjust image brightness to avoid washed out portions
-            in the resulting color transfer that can be caused by clipping.
-    preserve_paper: Should color transfer strictly follow methodology
-            layed out in original paper? The method does not always produce
-            aesthetically pleasing results.
-            If False then L*a*b* components will scaled using the reciprocal of
-            the scaling factor proposed in the paper.  This method seems to produce
-            more consistently aesthetically pleasing results
-
-    Returns:
-    -------
-    transfer: NumPy array
-            OpenCV image (w, h, 3) NumPy array (uint8)
-    """
-
-    # convert the images from the RGB to L*ab* color space, being
-    # sure to utilizing the floating point data type (note: OpenCV
-    # expects floats to be 32-bit, so use that instead of 64-bit)
+                                                                 
+                                                                  
+                                                                 
     source = cv2.cvtColor(source, cv2.COLOR_BGR2LAB).astype(np.float32)
     target = cv2.cvtColor(target, cv2.COLOR_BGR2LAB).astype(np.float32)
 
-    # compute color statistics for the source and target images
+                                                               
     src_input = source if source_mask is None else source*source_mask
     tgt_input = target if target_mask is None else target*target_mask
     (lMeanSrc, lStdSrc, aMeanSrc, aStdSrc,
@@ -234,51 +234,51 @@ def reinhard_color_transfer(target, source, clip=False, preserve_paper=False, so
     (lMeanTar, lStdTar, aMeanTar, aStdTar,
      bMeanTar, bStdTar) = lab_image_stats(tgt_input)
 
-    # subtract the means from the target image
+                                              
     (l, a, b) = cv2.split(target)
     l -= lMeanTar
     a -= aMeanTar
     b -= bMeanTar
 
     if preserve_paper:
-                # scale by the standard deviations using paper proposed factor
+                                                                              
         l = (lStdTar / lStdSrc) * l
         a = (aStdTar / aStdSrc) * a
         b = (bStdTar / bStdSrc) * b
     else:
-        # scale by the standard deviations using reciprocal of paper proposed factor
+                                                                                    
         l = (lStdSrc / lStdTar) * l
         a = (aStdSrc / aStdTar) * a
         b = (bStdSrc / bStdTar) * b
 
-    # add in the source mean
+                            
     l += lMeanSrc
     a += aMeanSrc
     b += bMeanSrc
 
-    # clip/scale the pixel intensities to [0, 255] if they fall
-    # outside this range
+                                                               
+                        
     l = _scale_array(l, clip=clip)
     a = _scale_array(a, clip=clip)
     b = _scale_array(b, clip=clip)
 
-    # merge the channels together and convert back to the RGB color
-    # space, being sure to utilize the 8-bit unsigned integer data
-    # type
+                                                                   
+                                                                  
+          
     transfer = cv2.merge([l, a, b])
     transfer = cv2.cvtColor(transfer.astype(np.uint8), cv2.COLOR_LAB2BGR)
 
-    # return the color transferred image
+                                        
     return transfer
 
 
 def linear_color_transfer(target_img, source_img, mode='pca', eps=1e-5):
-    '''
-    Matches the colour distribution of the target image to that of the source image
-    using a linear transform.
-    Images are expected to be of form (w,h,c) and float in [0,1].
-    Modes are chol, pca or sym for different choices of basis.
-    '''
+\
+\
+\
+\
+\
+       
     mu_t = target_img.mean(0).mean(0)
     t = target_img - mu_t
     t = t.transpose(2, 0, 1).reshape(t.shape[-1], -1)
@@ -313,13 +313,13 @@ def linear_color_transfer(target_img, source_img, mode='pca', eps=1e-5):
 
 
 def lab_image_stats(image):
-    # compute the mean and standard deviation of each channel
+                                                             
     (l, a, b) = cv2.split(image)
     (lMean, lStd) = (l.mean(), l.std())
     (aMean, aStd) = (a.mean(), a.std())
     (bMean, bStd) = (b.mean(), b.std())
 
-    # return the color statistics
+                                 
     return (lMean, lStd, aMean, aStd, bMean, bStd)
 
 
@@ -338,8 +338,8 @@ def _scale_array(arr, clip=True):
 
 
 def channel_hist_match(source, template, hist_match_threshold=255, mask=None):
-    # Code borrowed from:
-    # https://stackoverflow.com/questions/32655686/histogram-matching-of-two-images-in-python-2-x
+                         
+                                                                                                 
     masked_source = source
     masked_template = template
 
@@ -414,9 +414,9 @@ def colorTransfer_fs(src_, dst_, mask):
     src = dst_
     dst = src_
     transferredDst = np.copy(dst)
-    # indeksy nie czarnych pikseli maski
+                                        
     maskIndices = np.where(mask != 0)
-    # src[maskIndices[0], maskIndices[1]] zwraca piksele w nie czarnym obszarze maski
+                                                                                     
 
     maskedSrc = src[maskIndices[0], maskIndices[1]].astype(np.int32)
     maskedDst = dst[maskIndices[0], maskIndices[1]].astype(np.int32)
@@ -434,23 +434,23 @@ def colorTransfer_fs(src_, dst_, mask):
 def colorTransfer_avg(img_src, img_tgt, mask=None):
     img_new = img_src.copy()
     img_old = img_tgt.copy()
-    # print(mask)
+                 
     if mask is not None:
-        img_new = (img_new*mask)#.astype(np.uint8)
-        img_old = (img_old*mask)#.astype(np.uint8)
-    # cv2.imshow('tgt', img_old)
+        img_new = (img_new*mask)                  
+        img_old = (img_old*mask)                  
+                                
     w,h,c = img_new.shape
     for i in range(img_new.shape[2]):
         old_avg = img_old[:, :, i].mean()
         new_avg = img_new[:, :, i].mean()
         diff_int = old_avg - new_avg
-        # print(diff_int)
+                         
         for m in range(img_new.shape[0]):
             for n in range(img_new.shape[1]):
                 temp = img_new[m,n,i] + diff_int
                 temp = max(0., temp)
                 temp = min(1., temp)
-                # print(img_new[m,n,i], temp)
+                                             
                 img_new[m,n,i] = temp
 
     return img_new
@@ -458,9 +458,9 @@ def colorTransfer_avg(img_src, img_tgt, mask=None):
 
 
 def color_transfer(ct_mode, img_src, img_trg, mask):
-    """
-    color transfer for [0,1] float32 inputs
-    """
+\
+\
+       
     img_src = img_src.astype(dtype=np.float32) / 255.0
     img_trg = img_trg.astype(dtype=np.float32) / 255.0
 
@@ -478,8 +478,8 @@ def color_transfer(ct_mode, img_src, img_trg, mask):
                                       np.clip(img_trg*255, 0,
                                               255).astype(np.uint8),
                                       source_mask=mask, target_mask=mask)
-                                      #preserve_paper=np.random.rand() < 0.5,
-                                      #clip=np.random.rand() < 0.5)
+                                                                             
+                                                                   
         out = np.clip(out.astype(np.float32) / 255.0, 0.0, 1.0)
     elif ct_mode == 'rct-fs':
         out = colorTransfer_fs(np.clip(img_src*255, 0, 255).astype(np.uint8),

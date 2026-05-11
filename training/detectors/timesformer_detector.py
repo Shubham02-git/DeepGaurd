@@ -16,39 +16,39 @@ class TimeSformerDetector(AbstractDetector):
         super().__init__()
         self.config = config
         self.backbone = self.build_backbone(config)
-        # self.fc_norm = nn.LayerNorm(768)
-        # self.temporal_module = self.build_temporal_module(config)
+                                          
+                                                                   
         self.head = nn.Linear(768, 2)
         self.loss_func = self.build_loss(config)
 
     def build_backbone(self, config):
         from transformers import TimesformerModel
         backbone = TimesformerModel.from_pretrained(config['pretrained'])
-        # for name, param in backbone.named_parameters():
-        #     print('{}: {}'.format(name, param.requires_grad))
-        # num_param = sum(p.numel() for p in backbone.parameters() if p.requires_grad)
-        # num_total_param = sum(p.numel() for p in backbone.parameters())
-        # print('Number of total parameters: {}, tunable parameters: {}'.format(num_total_param, num_param))
+                                                         
+                                                               
+                                                                                      
+                                                                         
+                                                                                                            
         return backbone
 
     def build_temporal_module(self, config):
         return nn.LSTM(input_size=2048, hidden_size=512, num_layers=3, batch_first=True)
 
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         loss_func = loss_class()
 
         return loss_func
 
     def features(self, data_dict: dict) -> torch.Tensor:
-        # b, t, c, h, w = data_dict['image'].shape
-        # frame_input = data_dict['image'].reshape(-1, c, h, w)
-        # # get frame-level features
-        # frame_level_features = self.backbone.features(frame_input)
-        # frame_level_features = F.adaptive_avg_pool2d(frame_level_features, (1, 1)).reshape(b, t, -1)
-        # # get video-level features
-        # video_level_features = self.temporal_module(frame_level_features)[0][:, -1, :]
+                                                  
+                                                               
+                                    
+                                                                    
+                                                                                                      
+                                    
+                                                                                        
 
         outputs = self.backbone(data_dict['image'], output_hidden_states=True)
         video_level_features = outputs[0][:, 0]

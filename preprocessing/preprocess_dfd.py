@@ -8,19 +8,19 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
-# ── Config ────────────────────────────────────────────────────────────────────
+                                                                                
 BASE = Path(r"F:\repo's\DeepfakeBench-main\DeepfakeBench-main\datasets\rgb\Celeb-DF-v2")
 FAKE_DIR = BASE / "fake" / "DFD_manipulated_sequences"
 REAL_DIR = BASE / "real" / "DFD_original sequences"
 FAKE_FRAMES = BASE / "fake" / "frames"
 REAL_FRAMES = BASE / "real" / "frames"
 
-NUM_FRAMES   = 32          # frames to extract per video
-RESOLUTION   = 256         # output face crop size
-SCALE_FACTOR = 1.3         # face crop scale (adds padding around detected box)
+NUM_FRAMES   = 32                                       
+RESOLUTION   = 256                                
+SCALE_FACTOR = 1.3                                                             
 MAX_WORKERS  = os.cpu_count() or 4
 LOG_PATH     = Path(__file__).parent / "logs" / "preprocess_dfd.log"
-# ──────────────────────────────────────────────────────────────────────────────
+                                                                                
 
 LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
@@ -41,14 +41,14 @@ def get_face_cascade():
 
 
 def crop_face(frame: np.ndarray, cascade, resolution: int, scale: float) -> np.ndarray | None:
-    """Detect the largest face in *frame* and return a square crop at *resolution*."""
+                                                                                      
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60))
     if len(faces) == 0:
         return None
-    # pick the largest face
+                           
     x, y, w, h = max(faces, key=lambda r: r[2] * r[3])
-    # add padding
+                 
     pad = int(max(w, h) * (scale - 1) / 2)
     H, W = frame.shape[:2]
     x1 = max(0, x - pad)
@@ -62,7 +62,7 @@ def crop_face(frame: np.ndarray, cascade, resolution: int, scale: float) -> np.n
 
 
 def extract_video(video_path: Path, out_dir: Path, num_frames: int, resolution: int, scale: float) -> int:
-    """Extract *num_frames* face-cropped PNG files from *video_path* into *out_dir*."""
+                                                                                       
     cascade = get_face_cascade()
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
@@ -75,7 +75,7 @@ def extract_video(video_path: Path, out_dir: Path, num_frames: int, resolution: 
         log.warning(f"No frames in {video_path}")
         return 0
 
-    # evenly-spaced frame indices
+                                 
     indices = np.linspace(0, total - 1, num_frames, dtype=int)
     vid_out_dir = out_dir / video_path.stem
     vid_out_dir.mkdir(parents=True, exist_ok=True)
@@ -83,7 +83,7 @@ def extract_video(video_path: Path, out_dir: Path, num_frames: int, resolution: 
     saved = 0
     for i, idx in enumerate(indices):
         img_path = vid_out_dir / f"{i:03d}.png"
-        if img_path.exists():          # skip already extracted
+        if img_path.exists():                                  
             saved += 1
             continue
 
@@ -94,7 +94,7 @@ def extract_video(video_path: Path, out_dir: Path, num_frames: int, resolution: 
 
         face = crop_face(frame, cascade, resolution, scale)
         if face is None:
-            # fallback: centre-crop without face detection
+                                                          
             h, w = frame.shape[:2]
             side = min(h, w)
             top  = (h - side) // 2

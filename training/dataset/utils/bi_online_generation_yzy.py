@@ -27,15 +27,15 @@ def total_euclidean_distance(a,b):
     return np.sum(np.linalg.norm(a-b,axis=1))
 
 def random_get_hull(landmark,img1,hull_type0, idx=0):
-    # print("in bi online generation----------",hull_type0)
+                                                           
     if hull_type0 == -1:
         hull_type = random.choice([0,1,2,3])
     else:
-        # hull_type = int(random.choice(hull_type0))
+                                                    
         hull_type = hull_type0
-    # print(hull_type)
+                      
     if hull_type == 0:
-        # print("here")
+                       
         mask = dfl_full(landmarks=landmark.astype('int32'),face=img1, channels=3).mask
         return mask/255, idx
     elif hull_type == 1:
@@ -46,18 +46,18 @@ def random_get_hull(landmark,img1,hull_type0, idx=0):
         return mask/255, idx
     elif hull_type == 3:
         mask = facehull(landmarks=landmark.astype('int32'),face=img1, channels=3).mask
-        return mask/255, idx # --change0628-- mask/255
+        return mask/255, idx                          
     
-    # elif hull_type == 4: # SLADD
-    #     mask = SladdMasking(landmarks=landmark.astype('int32'),face=img1, channels=3, idx=0).mask
-    #     return mask/1., idx
-    # elif hull_type == 5: # SLADD
-    #     mask = SladdMasking(landmarks=landmark.astype('int32'),face=img1, channels=3, idx=1).mask
-    #     return mask/1., idx
-    # elif hull_type == 6: # SLADD
-    #     mask = SladdMasking(landmarks=landmark.astype('int32'),face=img1, channels=3, idx=2).mask
-    #     return mask/1., idx
-    elif hull_type == 6: # SLADD/mouth
+                                  
+                                                                                                   
+                             
+                                  
+                                                                                                   
+                             
+                                  
+                                                                                                   
+                             
+    elif hull_type == 6:              
         mask = SladdMasking(landmarks=landmark.astype('int32'),face=img1, channels=3, idx=3).mask
         return mask/1., idx
 
@@ -82,7 +82,7 @@ def random_erode_dilate(mask, ksize=None):
     return mask
 
 
-# borrow from https://github.com/MarekKowalski/FaceSwap
+                                                       
 def blendImages(src, dst, mask, featherAmount=0.2):
    
     maskIndices = np.where(mask != 0)
@@ -111,7 +111,7 @@ def blendImages(src, dst, mask, featherAmount=0.2):
     return composedImg, composedMask
 
 
-# borrow from https://github.com/MarekKowalski/FaceSwap
+                                                       
 def colorTransfer(src, dst, mask):
     transferredDst = np.copy(dst)
     
@@ -138,13 +138,13 @@ class BIOnlineGeneration():
             self.landmarks_record =  json.load(f)
             for k,v in self.landmarks_record.items():
                 self.landmarks_record[k] = np.array(v)
-        # extract all frame from all video in the name of {videoid}_{frameid}
+                                                                             
         self.data_list = [
                     '000_0000.png',
                     '001_0000.png'      
                     ] * 10000
         
-        # predefine mask distortion
+                                   
         self.distortion = iaa.Sequential([iaa.PiecewiseAffine(scale=(0.01, 0.15))])
         
     def gen_one_datapoint(self):
@@ -157,7 +157,7 @@ class BIOnlineGeneration():
             face_img = io.imread(background_face_path)
             mask = np.zeros((317, 317, 1))
         
-        # randomly downsample after BI pipeline
+                                               
         if random.randint(0,1):
             aug_size = random.randint(64, 317)
             face_img = Image.fromarray(face_img)
@@ -168,7 +168,7 @@ class BIOnlineGeneration():
             face_img = face_img.resize((317, 317),Image.BILINEAR)
             face_img = np.array(face_img)
             
-        # random jpeg compression after BI pipeline
+                                                   
         if random.randint(0,1):
             quality = random.randint(60, 100)
             encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
@@ -178,7 +178,7 @@ class BIOnlineGeneration():
         face_img = face_img[60:317,30:287,:]
         mask = mask[60:317,30:287,:]
         
-        # random flip
+                     
         if random.randint(0,1):
             face_img = np.flip(face_img,1)
             mask = np.flip(mask,1)
@@ -192,31 +192,31 @@ class BIOnlineGeneration():
         foreground_face_path = self.search_similar_face(background_landmark,background_face_path)
         foreground_face = io.imread(foreground_face_path)
         
-        # down sample before blending
+                                     
         aug_size = random.randint(128,317)
         background_landmark = background_landmark * (aug_size/317)
         foreground_face = sktransform.resize(foreground_face,(aug_size,aug_size),preserve_range=True).astype(np.uint8)
         background_face = sktransform.resize(background_face,(aug_size,aug_size),preserve_range=True).astype(np.uint8)
         
-        # get random type of initial blending mask
+                                                  
         mask, idx = random_get_hull(background_landmark, background_face)
        
-        #  random deform mask
+                             
         mask = self.distortion.augment_image(mask)
         mask = random_erode_dilate(mask)
         
-        # filte empty mask after deformation
+                                            
         if np.sum(mask) == 0 :
             raise NotImplementedError
 
-        # apply color transfer
+                              
         foreground_face = colorTransfer(background_face, foreground_face, mask*255)
         
-        # blend two face
+                        
         blended_face, mask = blendImages(foreground_face, background_face, mask*255)
         blended_face = blended_face.astype(np.uint8)
        
-        # resize back to default resolution
+                                           
         blended_face = sktransform.resize(blended_face,(317,317),preserve_range=True).astype(np.uint8)
         mask = sktransform.resize(mask,(317,317),preserve_range=True)
         mask = mask[:,:,0:1]
@@ -226,14 +226,14 @@ class BIOnlineGeneration():
         vid_id, frame_id = name_resolve(background_face_path)
         min_dist = 99999999
         
-        # random sample 5000 frame from all frams:
+                                                  
         all_candidate_path = random.sample( self.data_list, k=5000) 
         
-        # filter all frame that comes from the same video as background face
+                                                                            
         all_candidate_path = filter(lambda k:name_resolve(k)[0] != vid_id, all_candidate_path)
         all_candidate_path = list(all_candidate_path)
         
-        # loop throungh all candidates frame to get best match
+                                                              
         for candidate_path in all_candidate_path:
             candidate_landmark = self.landmarks_record[candidate_path].astype(np.float32)
             candidate_distance = total_euclidean_distance(candidate_landmark, this_landmark)

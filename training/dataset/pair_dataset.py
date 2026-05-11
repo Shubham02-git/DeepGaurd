@@ -8,32 +8,32 @@ class pairDataset(DeepfakeAbstractBaseDataset):
     def __init__(self, config=None, mode='train'):
         super().__init__(config, mode)
         
-        # Get real and fake image lists
-        # Fix the label of real images to be 0 and fake images to be 1
+                                       
+                                                                      
         self.fake_imglist = [(img, label, 1) for img, label in zip(self.image_list, self.label_list) if label != 0]
         self.real_imglist = [(img, label, 0) for img, label in zip(self.image_list, self.label_list) if label == 0]
 
     def __getitem__(self, index, norm=True):
-        # Get the fake and real image paths and labels
+                                                      
         fake_image_path, fake_spe_label, fake_label = self.fake_imglist[index]
-        real_index = random.randint(0, len(self.real_imglist) - 1)  # Randomly select a real image
+        real_index = random.randint(0, len(self.real_imglist) - 1)                                
         real_image_path, real_spe_label, real_label = self.real_imglist[real_index]
 
-        # Get the mask and landmark paths for fake and real images
+                                                                  
         fake_mask_path = fake_image_path.replace('frames', 'masks')
         fake_landmark_path = fake_image_path.replace('frames', 'landmarks').replace('.png', '.npy')
         
         real_mask_path = real_image_path.replace('frames', 'masks')
         real_landmark_path = real_image_path.replace('frames', 'landmarks').replace('.png', '.npy')
 
-        # Load the fake and real images
+                                       
         fake_image = self.load_rgb(fake_image_path)
         real_image = self.load_rgb(real_image_path)
 
-        fake_image = np.array(fake_image)  # Convert to numpy array for data augmentation
-        real_image = np.array(real_image)  # Convert to numpy array for data augmentation
+        fake_image = np.array(fake_image)                                                
+        real_image = np.array(real_image)                                                
 
-        # Load mask and landmark (if needed) for fake and real images
+                                                                     
         if self.config['with_mask']:
             fake_mask = self.load_mask(fake_mask_path)
             real_mask = self.load_mask(real_mask_path)
@@ -46,7 +46,7 @@ class pairDataset(DeepfakeAbstractBaseDataset):
         else:
             fake_landmarks, real_landmarks = None, None
 
-        # Do transforms for fake and real images
+                                                
         fake_image_trans, fake_landmarks_trans, fake_mask_trans = self.data_aug(fake_image, fake_landmarks, fake_mask)
         real_image_trans, real_landmarks_trans, real_mask_trans = self.data_aug(real_image, real_landmarks, real_mask)
 
@@ -54,11 +54,11 @@ class pairDataset(DeepfakeAbstractBaseDataset):
             return {"fake": (fake_image_trans, fake_label), 
                     "real": (real_image_trans, real_label)}
 
-        # To tensor and normalize for fake and real images
+                                                          
         fake_image_trans = self.normalize(self.to_tensor(fake_image_trans))
         real_image_trans = self.normalize(self.to_tensor(real_image_trans))
 
-        # Convert landmarks and masks to tensors if they exist
+                                                              
         if self.config['with_landmark']:
             fake_landmarks_trans = torch.from_numpy(fake_landmarks_trans)
             real_landmarks_trans = torch.from_numpy(real_landmarks_trans)
@@ -74,22 +74,22 @@ class pairDataset(DeepfakeAbstractBaseDataset):
 
     @staticmethod
     def collate_fn(batch):
-        """
-        Collate a batch of data points.
-
-        Args:
-            batch (list): A list of tuples containing the image tensor, the label tensor,
-                        the landmark tensor, and the mask tensor.
-
-        Returns:
-            A tuple containing the image tensor, the label tensor, the landmark tensor,
-            and the mask tensor.
-        """
-        # Separate the image, label, landmark, and mask tensors for fake and real data
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+           
+                                                                                      
         fake_images, fake_labels, fake_spe_labels, fake_landmarks, fake_masks = zip(*[data["fake"] for data in batch])
         real_images, real_labels, real_spe_labels, real_landmarks, real_masks = zip(*[data["real"] for data in batch])
 
-        # Stack the image, label, landmark, and mask tensors for fake and real data
+                                                                                   
         fake_images = torch.stack(fake_images, dim=0)
         fake_labels = torch.LongTensor(fake_labels)
         fake_spe_labels = torch.LongTensor(fake_spe_labels)
@@ -97,7 +97,7 @@ class pairDataset(DeepfakeAbstractBaseDataset):
         real_labels = torch.LongTensor(real_labels)
         real_spe_labels = torch.LongTensor(real_spe_labels)
 
-        # Special case for landmarks and masks if they are None
+                                                               
         if fake_landmarks[0] is not None:
             fake_landmarks = torch.stack(fake_landmarks, dim=0)
         else:
@@ -116,7 +116,7 @@ class pairDataset(DeepfakeAbstractBaseDataset):
         else:
             real_masks = None
 
-        # Combine the fake and real tensors and create a dictionary of the tensors
+                                                                                  
         images = torch.cat([real_images, fake_images], dim=0)
         labels = torch.cat([real_labels, fake_labels], dim=0)
         spe_labels = torch.cat([real_spe_labels, fake_spe_labels], dim=0)

@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+                      
+                                                                       
 
-"""Meters."""
+             
 
 import datetime
 import numpy as np
@@ -26,14 +26,14 @@ logger = logging.get_logger(__name__)
 
 
 def get_ava_mini_groundtruth(full_groundtruth):
-    """
-    Get the groundtruth annotations corresponding the "subset" of AVA val set.
-    We define the subset to be the frames such that (second % 4 == 0).
-    We optionally use subset for faster evaluation during training
-    (in order to track training progress).
-    Args:
-        full_groundtruth(dict): list of groundtruth.
-    """
+\
+\
+\
+\
+\
+\
+\
+       
     ret = [defaultdict(list), defaultdict(list), defaultdict(list)]
 
     for i in range(3):
@@ -44,16 +44,16 @@ def get_ava_mini_groundtruth(full_groundtruth):
 
 
 class AVAMeter(object):
-    """
-    Measure the AVA train, val, and test stats.
-    """
+\
+\
+       
 
     def __init__(self, overall_iters, cfg, mode):
-        """
-            overall_iters (int): the overall number of iterations of one epoch.
-            cfg (CfgNode): configs.
-            mode (str): `train`, `val`, or `test` mode.
-        """
+\
+\
+\
+\
+           
         self.cfg = cfg
         self.lr = None
         self.loss = ScalarMeter(cfg.LOG_PERIOD)
@@ -81,12 +81,12 @@ class AVAMeter(object):
         )
 
     def log_iter_stats(self, cur_epoch, cur_iter):
-        """
-        Log the stats.
-        Args:
-            cur_epoch (int): the current epoch.
-            cur_iter (int): the current iteration.
-        """
+\
+\
+\
+\
+\
+           
 
         if (cur_iter + 1) % self.cfg.LOG_PERIOD != 0:
             return
@@ -127,21 +127,21 @@ class AVAMeter(object):
         logging.log_json_stats(stats)
 
     def iter_tic(self):
-        """
-        Start to record time.
-        """
+\
+\
+           
         self.iter_timer.reset()
 
     def iter_toc(self):
-        """
-        Stop to record time.
-        """
+\
+\
+           
         self.iter_timer.pause()
 
     def reset(self):
-        """
-        Reset the Meter.
-        """
+\
+\
+           
         self.loss.reset()
 
         self.all_preds = []
@@ -149,15 +149,15 @@ class AVAMeter(object):
         self.all_metadata = []
 
     def update_stats(self, preds, ori_boxes, metadata, loss=None, lr=None):
-        """
-        Update the current stats.
-        Args:
-            preds (tensor): prediction embedding.
-            ori_boxes (tensor): original boxes (x1, y1, x2, y2).
-            metadata (tensor): metadata of the AVA data.
-            loss (float): loss value.
-            lr (float): learning rate.
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+           
         if self.mode in ["val", "test"]:
             self.all_preds.append(preds)
             self.all_ori_boxes.append(ori_boxes)
@@ -168,9 +168,9 @@ class AVAMeter(object):
             self.lr = lr
 
     def finalize_metrics(self, log=True):
-        """
-        Calculate and log the final AVA metrics.
-        """
+\
+\
+           
         all_preds = torch.cat(self.all_preds, dim=0)
         all_ori_boxes = torch.cat(self.all_ori_boxes, dim=0)
         all_metadata = torch.cat(self.all_metadata, dim=0)
@@ -195,11 +195,11 @@ class AVAMeter(object):
             logging.log_json_stats(stats)
 
     def log_epoch_stats(self, cur_epoch):
-        """
-        Log the stats of the current epoch.
-        Args:
-            cur_epoch (int): the number of current epoch.
-        """
+\
+\
+\
+\
+           
         if self.mode in ["val", "test"]:
             self.finalize_metrics(log=False)
             stats = {
@@ -214,12 +214,12 @@ class AVAMeter(object):
 
 
 class TestMeter(object):
-    """
-    Perform the multi-view ensemble for testing: each video with an unique index
-    will be sampled with multiple clips, and the predictions of the clips will
-    be aggregated to produce the final prediction for the video.
-    The accuracy is calculated with the given ground truth labels.
-    """
+\
+\
+\
+\
+\
+       
 
     def __init__(
         self,
@@ -230,27 +230,27 @@ class TestMeter(object):
         multi_label=False,
         ensemble_method="sum",
     ):
-        """
-        Construct tensors to store the predictions and labels. Expect to get
-        num_clips predictions from each video, and calculate the metrics on
-        num_videos videos.
-        Args:
-            num_videos (int): number of videos to test.
-            num_clips (int): number of clips sampled from each video for
-                aggregating the final prediction for the video.
-            num_cls (int): number of classes for each prediction.
-            overall_iters (int): overall iterations for testing.
-            multi_label (bool): if True, use map as the metric.
-            ensemble_method (str): method to perform the ensemble, options
-                include "sum", and "max".
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+           
 
         self.iter_timer = Timer()
         self.num_clips = num_clips
         self.overall_iters = overall_iters
         self.multi_label = multi_label
         self.ensemble_method = ensemble_method
-        # Initialize tensors.
+                             
         self.video_preds = torch.zeros((num_videos, num_cls))
         if multi_label:
             self.video_preds -= 1e10
@@ -261,13 +261,13 @@ class TestMeter(object):
             else torch.zeros((num_videos)).long()
         )
         self.clip_count = torch.zeros((num_videos)).long()
-        # Reset metric.
+                       
         self.reset()
 
     def reset(self):
-        """
-        Reset the metric.
-        """
+\
+\
+           
         self.clip_count.zero_()
         self.video_preds.zero_()
         if self.multi_label:
@@ -275,18 +275,18 @@ class TestMeter(object):
         self.video_labels.zero_()
 
     def update_stats(self, preds, labels, clip_ids):
-        """
-        Collect the predictions from the current batch and perform on-the-flight
-        summation as ensemble.
-        Args:
-            preds (tensor): predictions from the current batch. Dimension is
-                N x C where N is the batch size and C is the channel size
-                (num_cls).
-            labels (tensor): the corresponding labels of the current batch.
-                Dimension is N.
-            clip_ids (tensor): clip indexes of the current batch, dimension is
-                N.
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+           
         for ind in range(preds.shape[0]):
             vid_id = int(clip_ids[ind]) // self.num_clips
             if self.video_labels[vid_id].sum() > 0:
@@ -310,11 +310,11 @@ class TestMeter(object):
             self.clip_count[vid_id] += 1
 
     def log_iter_stats(self, cur_iter):
-        """
-        Log the stats.
-        Args:
-            cur_iter (int): the current iteration of testing.
-        """
+\
+\
+\
+\
+           
         eta_sec = self.iter_timer.seconds() * (self.overall_iters - cur_iter)
         eta = str(datetime.timedelta(seconds=int(eta_sec)))
         stats = {
@@ -332,11 +332,11 @@ class TestMeter(object):
         self.iter_timer.pause()
 
     def finalize_metrics(self, ks=(1, 5)):
-        """
-        Calculate and log the final ensembled metrics.
-        ks (tuple): list of top-k values for topk_accuracies. For example,
-            ks = (1, 5) correspods to top-1 and top-5 accuracy.
-        """
+\
+\
+\
+\
+           
         if not all(self.clip_count == self.num_clips):
             logger.warning(
                 "clip count {} ~= num clips {}".format(
@@ -373,67 +373,67 @@ class TestMeter(object):
 
 
 class ScalarMeter(object):
-    """
-    A scalar meter uses a deque to track a series of scaler values with a given
-    window size. It supports calculating the median and average values of the
-    window, and also supports calculating the global average.
-    """
+\
+\
+\
+\
+       
 
     def __init__(self, window_size):
-        """
-        Args:
-            window_size (int): size of the max length of the deque.
-        """
+\
+\
+\
+           
         self.deque = deque(maxlen=window_size)
         self.total = 0.0
         self.count = 0
 
     def reset(self):
-        """
-        Reset the deque.
-        """
+\
+\
+           
         self.deque.clear()
         self.total = 0.0
         self.count = 0
 
     def add_value(self, value):
-        """
-        Add a new scalar value to the deque.
-        """
+\
+\
+           
         self.deque.append(value)
         self.count += 1
         self.total += value
 
     def get_win_median(self):
-        """
-        Calculate the current median value of the deque.
-        """
+\
+\
+           
         return np.median(self.deque)
 
     def get_win_avg(self):
-        """
-        Calculate the current average value of the deque.
-        """
+\
+\
+           
         return np.mean(self.deque)
 
     def get_global_avg(self):
-        """
-        Calculate the global mean value.
-        """
+\
+\
+           
         return self.total / self.count
 
 
 class TrainMeter(object):
-    """
-    Measure training stats.
-    """
+\
+\
+       
 
     def __init__(self, epoch_iters, cfg):
-        """
-        Args:
-            epoch_iters (int): the overall number of iterations of one epoch.
-            cfg (CfgNode): configs.
-        """
+\
+\
+\
+\
+           
         self._cfg = cfg
         self.epoch_iters = epoch_iters
         self.MAX_EPOCH = cfg.SOLVER.MAX_EPOCH * epoch_iters
@@ -441,18 +441,18 @@ class TrainMeter(object):
         self.loss = ScalarMeter(cfg.LOG_PERIOD)
         self.loss_total = 0.0
         self.lr = None
-        # Current minibatch errors (smoothed over a window).
+                                                            
         self.mb_top1_err = ScalarMeter(cfg.LOG_PERIOD)
         self.mb_top5_err = ScalarMeter(cfg.LOG_PERIOD)
-        # Number of misclassified examples.
+                                           
         self.num_top1_mis = 0
         self.num_top5_mis = 0
         self.num_samples = 0
 
     def reset(self):
-        """
-        Reset the Meter.
-        """
+\
+\
+           
         self.loss.reset()
         self.loss_total = 0.0
         self.lr = None
@@ -463,47 +463,47 @@ class TrainMeter(object):
         self.num_samples = 0
 
     def iter_tic(self):
-        """
-        Start to record time.
-        """
+\
+\
+           
         self.iter_timer.reset()
 
     def iter_toc(self):
-        """
-        Stop to record time.
-        """
+\
+\
+           
         self.iter_timer.pause()
 
     def update_stats(self, top1_err, top5_err, loss, lr, mb_size):
-        """
-        Update the current stats.
-        Args:
-            top1_err (float): top1 error rate.
-            top5_err (float): top5 error rate.
-            loss (float): loss value.
-            lr (float): learning rate.
-            mb_size (int): mini batch size.
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+           
         self.loss.add_value(loss)
         self.lr = lr
         self.loss_total += loss * mb_size
         self.num_samples += mb_size
 
         if not self._cfg.DATA.MULTI_LABEL:
-            # Current minibatch stats
+                                     
             self.mb_top1_err.add_value(top1_err)
             self.mb_top5_err.add_value(top5_err)
-            # Aggregate stats
+                             
             self.num_top1_mis += top1_err * mb_size
             self.num_top5_mis += top5_err * mb_size
 
     def log_iter_stats(self, cur_epoch, cur_iter):
-        """
-        log the stats of the current iteration.
-        Args:
-            cur_epoch (int): the number of current epoch.
-            cur_iter (int): the number of current iteration.
-        """
+\
+\
+\
+\
+\
+           
         if (cur_iter + 1) % self._cfg.LOG_PERIOD != 0:
             return
         eta_sec = self.iter_timer.seconds() * (
@@ -526,11 +526,11 @@ class TrainMeter(object):
         logging.log_json_stats(stats)
 
     def log_epoch_stats(self, cur_epoch):
-        """
-        Log the stats of the current epoch.
-        Args:
-            cur_epoch (int): the number of current epoch.
-        """
+\
+\
+\
+\
+           
         eta_sec = self.iter_timer.seconds() * (
             self.MAX_EPOCH - (cur_epoch + 1) * self.epoch_iters
         )
@@ -555,16 +555,16 @@ class TrainMeter(object):
 
 
 class TrainIterMeter(object):
-    """
-    Measure training stats.
-    """
+\
+\
+       
 
     def __init__(self, epoch_iters, cfg,extra=[]):
-        """
-        Args:
-            epoch_iters (int): the overall number of iterations of one epoch.
-            cfg (CfgNode): configs.
-        """
+\
+\
+\
+\
+           
         self._cfg = cfg
         self.epoch_iters = epoch_iters
         self.MAX_EPOCH = cfg.SOLVER.MAX_EPOCH * epoch_iters
@@ -573,15 +573,15 @@ class TrainIterMeter(object):
         self.loss_total = 0.0
         self.lr = None
         
-        # Number of misclassified examples.
+                                           
         self.num_samples = 0
 
         self.meters={key:ScalarMeter(cfg.LOG_PERIOD) for key in extra}
 
     def reset(self):
-        """
-        Reset the Meter.
-        """
+\
+\
+           
         self.loss.reset()
         self.loss_total = 0.0
         self.lr = None
@@ -593,27 +593,27 @@ class TrainIterMeter(object):
             meter.reset()
 
     def iter_tic(self):
-        """
-        Start to record time.
-        """
+\
+\
+           
         self.iter_timer.reset()
 
     def iter_toc(self):
-        """
-        Stop to record time.
-        """
+\
+\
+           
         self.iter_timer.pause()
 
     def update_stats(self, loss, lr, mb_size,extra={}):
-        """
-        Update the current stats.
-        Args:
-            top1_err (float): top1 error rate.
-            top5_err (float): top5 error rate.
-            loss (float): loss value.
-            lr (float): learning rate.
-            mb_size (int): mini batch size.
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+           
         self.loss.add_value(loss)
         self.lr = lr
         self.loss_total += loss * mb_size
@@ -624,12 +624,12 @@ class TrainIterMeter(object):
             self.meters[key].add_value(val)
 
     def log_iter_stats(self, cur_epoch, cur_iter,extra={}):
-        """
-        log the stats of the current iteration.
-        Args:
-            cur_epoch (int): the number of current epoch.
-            cur_iter (int): the number of current iteration.
-        """
+\
+\
+\
+\
+\
+           
         if (cur_iter + 1) % self._cfg.LOG_PERIOD != 0:
             return
         eta_sec = self.iter_timer.seconds() * (
@@ -655,11 +655,11 @@ class TrainIterMeter(object):
         logging.log_json_stats(stats)
 
     def log_epoch_stats(self, cur_epoch):
-        """
-        Log the stats of the current epoch.
-        Args:
-            cur_epoch (int): the number of current epoch.
-        """
+\
+\
+\
+\
+           
         eta_sec = self.iter_timer.seconds() * (
             self.MAX_EPOCH - (cur_epoch + 1) * self.epoch_iters
         )
@@ -682,26 +682,26 @@ class TrainIterMeter(object):
 
 
 class ValMeter(object):
-    """
-    Measures validation stats.
-    """
+\
+\
+       
 
     def __init__(self, max_iter, cfg):
-        """
-        Args:
-            max_iter (int): the max number of iteration of the current epoch.
-            cfg (CfgNode): configs.
-        """
+\
+\
+\
+\
+           
         self._cfg = cfg
         self.max_iter = max_iter
         self.iter_timer = Timer()
-        # Current minibatch errors (smoothed over a window).
+                                                            
         self.mb_top1_err = ScalarMeter(cfg.LOG_PERIOD)
         self.mb_top5_err = ScalarMeter(cfg.LOG_PERIOD)
-        # Min errors (over the full val set).
+                                             
         self.min_top1_err = 100.0
         self.min_top5_err = 100.0
-        # Number of misclassified examples.
+                                           
         self.num_top1_mis = 0
         self.num_top5_mis = 0
         self.num_samples = 0
@@ -709,9 +709,9 @@ class ValMeter(object):
         self.all_labels = []
 
     def reset(self):
-        """
-        Reset the Meter.
-        """
+\
+\
+           
         self.iter_timer.reset()
         self.mb_top1_err.reset()
         self.mb_top5_err.reset()
@@ -722,25 +722,25 @@ class ValMeter(object):
         self.all_labels = []
 
     def iter_tic(self):
-        """
-        Start to record time.
-        """
+\
+\
+           
         self.iter_timer.reset()
 
     def iter_toc(self):
-        """
-        Stop to record time.
-        """
+\
+\
+           
         self.iter_timer.pause()
 
     def update_stats(self, top1_err, top5_err, mb_size):
-        """
-        Update the current stats.
-        Args:
-            top1_err (float): top1 error rate.
-            top5_err (float): top5 error rate.
-            mb_size (int): mini batch size.
-        """
+\
+\
+\
+\
+\
+\
+           
         self.mb_top1_err.add_value(top1_err)
         self.mb_top5_err.add_value(top5_err)
         self.num_top1_mis += top1_err * mb_size
@@ -748,23 +748,23 @@ class ValMeter(object):
         self.num_samples += mb_size
 
     def update_predictions(self, preds, labels):
-        """
-        Update predictions and labels.
-        Args:
-            preds (tensor): model output predictions.
-            labels (tensor): labels.
-        """
-        # TODO: merge update_prediction with update_stats.
+\
+\
+\
+\
+\
+           
+                                                          
         self.all_preds.append(preds)
         self.all_labels.append(labels)
 
     def log_iter_stats(self, cur_epoch, cur_iter):
-        """
-        log the stats of the current iteration.
-        Args:
-            cur_epoch (int): the number of current epoch.
-            cur_iter (int): the number of current iteration.
-        """
+\
+\
+\
+\
+\
+           
         if (cur_iter + 1) % self._cfg.LOG_PERIOD != 0:
             return
         eta_sec = self.iter_timer.seconds() * (self.max_iter - cur_iter - 1)
@@ -783,11 +783,11 @@ class ValMeter(object):
         logging.log_json_stats(stats)
 
     def log_epoch_stats(self, cur_epoch):
-        """
-        Log the stats of the current epoch.
-        Args:
-            cur_epoch (int): the number of current epoch.
-        """
+\
+\
+\
+\
+           
         stats = {
             "_type": "val_epoch",
             "epoch": "{}/{}".format(cur_epoch + 1, self._cfg.SOLVER.MAX_EPOCH),
@@ -815,14 +815,14 @@ class ValMeter(object):
 
 
 def get_map(preds, labels):
-    """
-    Compute mAP for multi-label case.
-    Args:
-        preds (numpy tensor): num_examples x num_classes.
-        labels (numpy tensor): num_examples x num_classes.
-    Returns:
-        mean_ap (int): final mAP score.
-    """
+\
+\
+\
+\
+\
+\
+\
+       
 
     logger.info("Getting mAP for {} examples".format(preds.shape[0]))
 

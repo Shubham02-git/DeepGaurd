@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+                      
+                                                                       
 
-"""Video models."""
+                   
 
 import torch
 import torch.nn as nn
@@ -13,59 +13,59 @@ from slowfast.models.batchnorm_helper import get_norm
 from . import head_helper, resnet_helper, stem_helper
 from .build import MODEL_REGISTRY
 
-# Number of blocks for different stages given the model depth.
+                                                              
 _MODEL_STAGE_DEPTH = {18:(2,2,2,2),50: (3, 4, 6, 3), 101: (3, 4, 23, 3)}
 
-# Basis of temporal kernel sizes for each of the stage.
+                                                       
 _TEMPORAL_KERNEL_BASIS = {
     "c2d": [
-        [[1]],  # conv1 temporal kernel.
-        [[1]],  # res2 temporal kernel.
-        [[1]],  # res3 temporal kernel.
-        [[1]],  # res4 temporal kernel.
-        [[1]],  # res5 temporal kernel.
+        [[1]],                          
+        [[1]],                         
+        [[1]],                         
+        [[1]],                         
+        [[1]],                         
     ],
     "c2d_nopool": [
-        [[1]],  # conv1 temporal kernel.
-        [[1]],  # res2 temporal kernel.
-        [[1]],  # res3 temporal kernel.
-        [[1]],  # res4 temporal kernel.
-        [[1]],  # res5 temporal kernel.
+        [[1]],                          
+        [[1]],                         
+        [[1]],                         
+        [[1]],                         
+        [[1]],                         
     ],
     "i3d": [
-        [[5]],  # conv1 temporal kernel.
-        [[3]],  # res2 temporal kernel.
-        [[3, 1]],  # res3 temporal kernel.
-        [[3, 1]],  # res4 temporal kernel.
-        [[1, 3]],  # res5 temporal kernel.
+        [[5]],                          
+        [[3]],                         
+        [[3, 1]],                         
+        [[3, 1]],                         
+        [[1, 3]],                         
     ],
     "r3d_18": [
-        [[3]],  # conv1 temporal kernel.
-        [[3]],  # res2 temporal kernel.
-        [[3, 1]],  # res3 temporal kernel.
-        [[3, 1]],  # res4 temporal kernel.
-        [[1, 3]],  # res5 temporal kernel.
+        [[3]],                          
+        [[3]],                         
+        [[3, 1]],                         
+        [[3, 1]],                         
+        [[1, 3]],                         
     ],
     "i3d_nopool": [
-        [[5]],  # conv1 temporal kernel.
-        [[3]],  # res2 temporal kernel.
-        [[3, 1]],  # res3 temporal kernel.
-        [[3, 1]],  # res4 temporal kernel.
-        [[1, 3]],  # res5 temporal kernel.
+        [[5]],                          
+        [[3]],                         
+        [[3, 1]],                         
+        [[3, 1]],                         
+        [[1, 3]],                         
     ],
     "slow": [
-        [[1]],  # conv1 temporal kernel.
-        [[1]],  # res2 temporal kernel.
-        [[1]],  # res3 temporal kernel.
-        [[3]],  # res4 temporal kernel.
-        [[3]],  # res5 temporal kernel.
+        [[1]],                          
+        [[1]],                         
+        [[1]],                         
+        [[3]],                         
+        [[3]],                         
     ],
     "slowfast": [
-        [[1], [5]],  # conv1 temporal kernel for slow and fast pathway.
-        [[1], [3]],  # res2 temporal kernel for slow and fast pathway.
-        [[1], [3]],  # res3 temporal kernel for slow and fast pathway.
-        [[3], [3]],  # res4 temporal kernel for slow and fast pathway.
-        [[3], [3]],  # res5 temporal kernel for slow and fast pathway.
+        [[1], [5]],                                                    
+        [[1], [3]],                                                   
+        [[1], [3]],                                                   
+        [[3], [3]],                                                   
+        [[3], [3]],                                                   
     ],
 }
 
@@ -83,11 +83,11 @@ _POOL1 = {
 
 
 class FuseFastToSlow(nn.Module):
-    """
-    Fuses the information from the Fast pathway to the Slow pathway. Given the
-    tensors from Slow pathway and Fast pathway, fuse information from Fast to
-    Slow, then return the fused tensors from Slow and Fast pathway in order.
-    """
+\
+\
+\
+\
+       
 
     def __init__(
         self,
@@ -100,22 +100,22 @@ class FuseFastToSlow(nn.Module):
         inplace_relu=True,
         norm_module=nn.BatchNorm3d,
     ):
-        """
-        Args:
-            dim_in (int): the channel dimension of the input.
-            fusion_conv_channel_ratio (int): channel ratio for the convolution
-                used to fuse from Fast pathway to Slow pathway.
-            fusion_kernel (int): kernel size of the convolution used to fuse
-                from Fast pathway to Slow pathway.
-            alpha (int): the frame rate ratio between the Fast and Slow pathway.
-            eps (float): epsilon for batch norm.
-            bn_mmt (float): momentum for batch norm. Noted that BN momentum in
-                PyTorch = 1 - BN momentum in Caffe2.
-            inplace_relu (bool): if True, calculate the relu on the original
-                input without allocating new memory.
-            norm_module (nn.Module): nn.Module for the normalization layer. The
-                default is nn.BatchNorm3d.
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+           
         super(FuseFastToSlow, self).__init__()
         self.conv_f2s = nn.Conv3d(
             dim_in,
@@ -144,22 +144,22 @@ class FuseFastToSlow(nn.Module):
 
 @MODEL_REGISTRY.register()
 class SlowFast(nn.Module):
-    """
-    SlowFast model builder for SlowFast network.
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-    """
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         super(SlowFast, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -170,13 +170,13 @@ class SlowFast(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a SlowFast model. The first pathway is the Slow pathway and the
-            second pathway is the Fast pathway.
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         assert len({len(pool_size), self.num_pathways}) == 1
@@ -361,7 +361,7 @@ class SlowFast(nn.Module):
                         cfg.DATA.CROP_SIZE // 32 // pool_size[1][1],
                         cfg.DATA.CROP_SIZE // 32 // pool_size[1][2],
                     ],
-                ],  # None for AdaptiveAvgPool3d((1, 1, 1))
+                ],                                         
                 dropout_rate=cfg.MODEL.DROPOUT_RATE,
                 act_func=cfg.MODEL.HEAD_ACT,
             )
@@ -388,28 +388,28 @@ class SlowFast(nn.Module):
 
 @MODEL_REGISTRY.register()
 class ResNet(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResNet, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -420,13 +420,13 @@ class ResNet(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         assert len({len(pool_size), self.num_pathways}) == 1
@@ -552,7 +552,7 @@ class ResNet(nn.Module):
                         cfg.DATA.CROP_SIZE // 32 // pool_size[0][1],
                         cfg.DATA.CROP_SIZE // 32 // pool_size[0][2],
                     ]
-                ],  # None for AdaptiveAvgPool3d((1, 1, 1))
+                ],                                         
                 dropout_rate=cfg.MODEL.DROPOUT_RATE,
                 act_func=cfg.MODEL.HEAD_ACT,
             )
@@ -576,28 +576,28 @@ class ResNet(nn.Module):
 
 @MODEL_REGISTRY.register()
 class ResNetVar(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResNetVar, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -608,13 +608,13 @@ class ResNetVar(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         assert len({len(pool_size), self.num_pathways}) == 1
@@ -753,28 +753,28 @@ class ResNetVar(nn.Module):
 
 @MODEL_REGISTRY.register()
 class ResNetBase(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResNetBase, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -785,13 +785,13 @@ class ResNetBase(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         assert len({len(pool_size), self.num_pathways}) == 1
@@ -912,7 +912,7 @@ class ResNetBase(nn.Module):
                 if cfg.MULTIGRID.SHORT_CYCLE
                 else [
                     None
-                ],  # None for AdaptiveAvgPool3d((1, 1, 1))
+                ],                                         
                 dropout_rate=cfg.MODEL.DROPOUT_RATE,
                 act_func=cfg.MODEL.HEAD_ACT,
             )
@@ -935,28 +935,28 @@ class ResNetBase(nn.Module):
 
 @MODEL_REGISTRY.register()
 class ResNetFreeze(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResNetFreeze, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -967,13 +967,13 @@ class ResNetFreeze(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         assert len({len(pool_size), self.num_pathways}) == 1
@@ -1094,7 +1094,7 @@ class ResNetFreeze(nn.Module):
                 if cfg.MULTIGRID.SHORT_CYCLE
                 else [
                     None
-                ],  # None for AdaptiveAvgPool3d((1, 1, 1))
+                ],                                         
                 dropout_rate=cfg.MODEL.DROPOUT_RATE,
                 act_func=cfg.MODEL.HEAD_ACT,
             )
@@ -1103,9 +1103,9 @@ class ResNetFreeze(nn.Module):
         assert isinstance(freeze_backbone,bool)
         x = self.s1(x)
         x = self.s2(x)
-        # for pathway in range(self.num_pathways):
-        #     pool = getattr(self, "pathway{}_pool".format(pathway))
-        #     x[pathway] = pool(x[pathway])
+                                                  
+                                                                    
+                                           
         x = self.s3(x)
         x = self.s4(x)
         x = self.s5(x)
@@ -1123,28 +1123,28 @@ from .unet_helper import DecoderBlock,LightDecoderBlock,ResDecoderBlock
 
 @MODEL_REGISTRY.register()
 class ResUNet(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResUNet, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -1159,13 +1159,13 @@ class ResUNet(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         self.cfg = cfg
@@ -1257,25 +1257,25 @@ class ResUNet(nn.Module):
             norm_module=self.norm_module,
         )
 
-        # self.s5 = resnet_helper.ResStage(
-        #     dim_in=[width_per_group * 16],
-        #     dim_out=[width_per_group * 32],
-        #     dim_inner=[dim_inner * 8],
-        #     temp_kernel_sizes=temp_kernel[4],
-        #     stride=cfg.RESNET.SPATIAL_STRIDES[3],
-        #     num_blocks=[d5],
-        #     num_groups=[num_groups],
-        #     num_block_temp_kernel=cfg.RESNET.NUM_BLOCK_TEMP_KERNEL[3],
-        #     nonlocal_inds=cfg.NONLOCAL.LOCATION[3],
-        #     nonlocal_group=cfg.NONLOCAL.GROUP[3],
-        #     nonlocal_pool=cfg.NONLOCAL.POOL[3],
-        #     instantiation=cfg.NONLOCAL.INSTANTIATION,
-        #     trans_func_name=cfg.RESNET.TRANS_FUNC,
-        #     stride_1x1=cfg.RESNET.STRIDE_1X1,
-        #     inplace_relu=cfg.RESNET.INPLACE_RELU,
-        #     dilation=cfg.RESNET.SPATIAL_DILATIONS[3],
-        #     norm_module=self.norm_module,
-        # )
+                                           
+                                            
+                                             
+                                        
+                                               
+                                                   
+                              
+                                      
+                                                                        
+                                                     
+                                                   
+                                                 
+                                                       
+                                                    
+                                               
+                                                   
+                                                       
+                                           
+           
         self.labels=["rotate","light"]
         self.dual_define("t4",self.labels,DecoderBlock(width_per_group * 16,width_per_group * 8,width_per_group * 8))
         self.dual_define("t3",self.labels,DecoderBlock(width_per_group * 8,width_per_group * 4, 256))
@@ -1311,14 +1311,14 @@ class ResUNet(nn.Module):
 
 
 
-    # @torchsnooper.snoop()
+                           
     def forward(self, x, bboxes=None):
-        x1 = self.s1(x)  # 1,64,8,56,56
-        x2 = self.s2(x1)  # 1,256,8,56,56
-        x3 = self.s3(x2)  # 1,512,8,28, 28
-        x = self.s4(x3)  # 1,1024,8,14,14
-        x = self.upsample(x) # 1,1024, 8, 28, 28
-        x = self.concat(x3,x)# 1,1024+512, 8, 28, 28
+        x1 = self.s1(x)                
+        x2 = self.s2(x1)                 
+        x3 = self.s3(x2)                  
+        x = self.s4(x3)                  
+        x = self.upsample(x)                    
+        x = self.concat(x3,x)                       
         x=[self.forward_branch(x,x1,x2,label) for label in self.labels]
         x=torch.cat(x,1)
         out = x.mean([3, 4]).view(-1, 1)*100
@@ -1330,42 +1330,42 @@ class ResUNet(nn.Module):
 
     def forward_branch(self,x,x1,x2,label):
         t4=getattr(self,f"t4_{label}")
-        x = t4(x[0])# 1,512, 8, 28, 28
-        x = self.upsample([x]) # 1,512, 8, 56, 56
-        x = self.concat(x2,x)# 1,256+512, 8, 56, 56
+        x = t4(x[0])                  
+        x = self.upsample([x])                   
+        x = self.concat(x2,x)                      
         t3= getattr(self,f"t3_{label}")
-        x = t3(x[0]) # 1,256, 8, 56, 56
-        x = self.concat(x1,[x]) # 1,320, 8, 56, 56
+        x = t3(x[0])                   
+        x = self.concat(x1,[x])                   
         conv1x1=getattr(self,f"conv1x1_{label}")
-        x = conv1x1(x[0]) # 1,2,8,56,56
+        x = conv1x1(x[0])              
         return x
 
 
 
 @MODEL_REGISTRY.register()
 class ResUNetLight(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResUNetLight, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -1380,13 +1380,13 @@ class ResUNetLight(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         self.cfg = cfg
@@ -1478,25 +1478,25 @@ class ResUNetLight(nn.Module):
             norm_module=self.norm_module,
         )
 
-        # self.s5 = resnet_helper.ResStage(
-        #     dim_in=[width_per_group * 16],
-        #     dim_out=[width_per_group * 32],
-        #     dim_inner=[dim_inner * 8],
-        #     temp_kernel_sizes=temp_kernel[4],
-        #     stride=cfg.RESNET.SPATIAL_STRIDES[3],
-        #     num_blocks=[d5],
-        #     num_groups=[num_groups],
-        #     num_block_temp_kernel=cfg.RESNET.NUM_BLOCK_TEMP_KERNEL[3],
-        #     nonlocal_inds=cfg.NONLOCAL.LOCATION[3],
-        #     nonlocal_group=cfg.NONLOCAL.GROUP[3],
-        #     nonlocal_pool=cfg.NONLOCAL.POOL[3],
-        #     instantiation=cfg.NONLOCAL.INSTANTIATION,
-        #     trans_func_name=cfg.RESNET.TRANS_FUNC,
-        #     stride_1x1=cfg.RESNET.STRIDE_1X1,
-        #     inplace_relu=cfg.RESNET.INPLACE_RELU,
-        #     dilation=cfg.RESNET.SPATIAL_DILATIONS[3],
-        #     norm_module=self.norm_module,
-        # )
+                                           
+                                            
+                                             
+                                        
+                                               
+                                                   
+                              
+                                      
+                                                                        
+                                                     
+                                                   
+                                                 
+                                                       
+                                                    
+                                               
+                                                   
+                                                       
+                                           
+           
         self.labels=["rotate","light"]
         self.dual_define("t4",self.labels,LightDecoderBlock(width_per_group * 16,width_per_group * 8,width_per_group * 4))
         self.dual_define("t3",self.labels,LightDecoderBlock(width_per_group * 4,width_per_group * 4, 128))
@@ -1533,12 +1533,12 @@ class ResUNetLight(nn.Module):
     def get_detach_var(self,x):
         return [t.detach() for t in x]
 
-    # @torchsnooper.snoop()
+                           
     def forward(self, x, freeze_backbone=False):
-        x1 = self.s1(x)  # 1,64,8,56,56
-        x2 = self.s2(x1)  # 1,256,8,56,56
-        x3 = self.s3(x2)  # 1,512,8,28, 28
-        x = self.s4(x3)  # 1,1024,8,14,14
+        x1 = self.s1(x)                
+        x2 = self.s2(x1)                 
+        x3 = self.s3(x2)                  
+        x = self.s4(x3)                  
         assert isinstance(freeze_backbone,bool)
         if freeze_backbone:
             x=self.get_detach_var(x)
@@ -1546,11 +1546,11 @@ class ResUNetLight(nn.Module):
             x2=self.get_detach_var(x2)
             x3=self.get_detach_var(x3)
             
-        x = self.upsample(x) # 1,1024, 8, 28, 28
-        x = self.concat(x3,x)# 1,1024+512, 8, 28, 28
+        x = self.upsample(x)                    
+        x = self.concat(x3,x)                       
         x=[self.forward_branch(x,x1,x2,label) for label in self.labels]
         x=torch.cat(x,1)
-        out = x.mean([3, 4]).view(-1, 1)*100 # 1,2,8,56,56
+        out = x.mean([3, 4]).view(-1, 1)*100              
         out = self.linear(out)
         out = out.view(x.size(0), -1)
         return x,out
@@ -1559,42 +1559,42 @@ class ResUNetLight(nn.Module):
 
     def forward_branch(self,x,x1,x2,label):
         t4=getattr(self,f"t4_{label}")
-        x = t4(x[0])# 1,256, 8, 28, 28
-        x = self.upsample([x]) # 1,256, 8, 56, 56
-        x = self.concat(x2,x)# 1,256+256, 8, 56, 56
+        x = t4(x[0])                  
+        x = self.upsample([x])                   
+        x = self.concat(x2,x)                      
         t3= getattr(self,f"t3_{label}")
-        x = t3(x[0]) # 1,128, 8, 56, 56
-        x = self.concat(x1,[x]) # 1,192, 8, 56, 56
+        x = t3(x[0])                   
+        x = self.concat(x1,[x])                   
         conv1x1=getattr(self,f"conv1x1_{label}")
-        x = conv1x1(x[0]) # 1,2,8,56,56
+        x = conv1x1(x[0])              
         return x
 
 
 
 @MODEL_REGISTRY.register()
 class ResUNetLightFix(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResUNetLightFix, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -1609,13 +1609,13 @@ class ResUNetLightFix(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         self.cfg = cfg
@@ -1707,25 +1707,25 @@ class ResUNetLightFix(nn.Module):
             norm_module=self.norm_module,
         )
 
-        # self.s5 = resnet_helper.ResStage(
-        #     dim_in=[width_per_group * 16],
-        #     dim_out=[width_per_group * 32],
-        #     dim_inner=[dim_inner * 8],
-        #     temp_kernel_sizes=temp_kernel[4],
-        #     stride=cfg.RESNET.SPATIAL_STRIDES[3],
-        #     num_blocks=[d5],
-        #     num_groups=[num_groups],
-        #     num_block_temp_kernel=cfg.RESNET.NUM_BLOCK_TEMP_KERNEL[3],
-        #     nonlocal_inds=cfg.NONLOCAL.LOCATION[3],
-        #     nonlocal_group=cfg.NONLOCAL.GROUP[3],
-        #     nonlocal_pool=cfg.NONLOCAL.POOL[3],
-        #     instantiation=cfg.NONLOCAL.INSTANTIATION,
-        #     trans_func_name=cfg.RESNET.TRANS_FUNC,
-        #     stride_1x1=cfg.RESNET.STRIDE_1X1,
-        #     inplace_relu=cfg.RESNET.INPLACE_RELU,
-        #     dilation=cfg.RESNET.SPATIAL_DILATIONS[3],
-        #     norm_module=self.norm_module,
-        # )
+                                           
+                                            
+                                             
+                                        
+                                               
+                                                   
+                              
+                                      
+                                                                        
+                                                     
+                                                   
+                                                 
+                                                       
+                                                    
+                                               
+                                                   
+                                                       
+                                           
+           
         self.labels=["rotate","light","skip"]
         self.dual_define("t4",self.labels,LightDecoderBlock(width_per_group * 16,width_per_group * 8,width_per_group * 4))
         self.dual_define("t3",self.labels,LightDecoderBlock(width_per_group * 4,width_per_group * 4, 128))
@@ -1765,12 +1765,12 @@ class ResUNetLightFix(nn.Module):
     def get_detach_var(self,x):
         return [t.detach() for t in x]
 
-    # @torchsnooper.snoop()
+                           
     def forward(self, x, freeze_backbone=False):
-        x1 = self.s1(x)  # 1,64,8,56,56
-        x2 = self.s2(x1)  # 1,256,8,56,56
-        x3 = self.s3(x2)  # 1,512,8,28, 28
-        x = self.s4(x3)  # 1,1024,8,14,14
+        x1 = self.s1(x)                
+        x2 = self.s2(x1)                 
+        x3 = self.s3(x2)                  
+        x = self.s4(x3)                  
         assert isinstance(freeze_backbone,bool)
         if freeze_backbone:
             x=self.get_detach_var(x)
@@ -1778,12 +1778,12 @@ class ResUNetLightFix(nn.Module):
             x2=self.get_detach_var(x2)
             x3=self.get_detach_var(x3)
             
-        x = self.upsample(x) # 1,1024, 8, 28, 28
-        x = self.concat(x3,x)# 1,1024+512, 8, 28, 28
+        x = self.upsample(x)                    
+        x = self.concat(x3,x)                       
         x=[self.forward_branch(x,x1,x2,label) for label in self.labels]
         x=torch.cat(x,1)
         x=torch.sigmoid(x)
-        out = x.mean([3, 4]).view(-1, 1)*100 # 1,2,8,56,56
+        out = x.mean([3, 4]).view(-1, 1)*100              
         out = self.linear(out)
         out = out.view(x.size(0), -1)
         out = torch.sigmoid(out)
@@ -1793,42 +1793,42 @@ class ResUNetLightFix(nn.Module):
 
     def forward_branch(self,x,x1,x2,label):
         t4=getattr(self,f"t4_{label}")
-        x = t4(x[0])# 1,256, 8, 28, 28
-        x = self.upsample([x]) # 1,256, 8, 56, 56
-        x = self.concat(x2,x)# 1,256+256, 8, 56, 56
+        x = t4(x[0])                  
+        x = self.upsample([x])                   
+        x = self.concat(x2,x)                      
         t3= getattr(self,f"t3_{label}")
-        x = t3(x[0]) # 1,128, 8, 56, 56
-        x = self.concat(x1,[x]) # 1,192, 8, 56, 56
+        x = t3(x[0])                   
+        x = self.concat(x1,[x])                   
         conv1x1=getattr(self,f"conv1x1_{label}")
-        x = conv1x1(x[0]) # 1,2,8,56,56
+        x = conv1x1(x[0])              
         return x
 
 
 
 @MODEL_REGISTRY.register()
 class ResUNetContinus(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResUNetContinus, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -1843,13 +1843,13 @@ class ResUNetContinus(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         self.cfg = cfg
@@ -1941,25 +1941,25 @@ class ResUNetContinus(nn.Module):
             norm_module=self.norm_module,
         )
 
-        # self.s5 = resnet_helper.ResStage(
-        #     dim_in=[width_per_group * 16],
-        #     dim_out=[width_per_group * 32],
-        #     dim_inner=[dim_inner * 8],
-        #     temp_kernel_sizes=temp_kernel[4],
-        #     stride=cfg.RESNET.SPATIAL_STRIDES[3],
-        #     num_blocks=[d5],
-        #     num_groups=[num_groups],
-        #     num_block_temp_kernel=cfg.RESNET.NUM_BLOCK_TEMP_KERNEL[3],
-        #     nonlocal_inds=cfg.NONLOCAL.LOCATION[3],
-        #     nonlocal_group=cfg.NONLOCAL.GROUP[3],
-        #     nonlocal_pool=cfg.NONLOCAL.POOL[3],
-        #     instantiation=cfg.NONLOCAL.INSTANTIATION,
-        #     trans_func_name=cfg.RESNET.TRANS_FUNC,
-        #     stride_1x1=cfg.RESNET.STRIDE_1X1,
-        #     inplace_relu=cfg.RESNET.INPLACE_RELU,
-        #     dilation=cfg.RESNET.SPATIAL_DILATIONS[3],
-        #     norm_module=self.norm_module,
-        # )
+                                           
+                                            
+                                             
+                                        
+                                               
+                                                   
+                              
+                                      
+                                                                        
+                                                     
+                                                   
+                                                 
+                                                       
+                                                    
+                                               
+                                                   
+                                                       
+                                           
+           
         self.labels=["all"]
         self.dual_define("t4",self.labels,LightDecoderBlock(width_per_group * 16,width_per_group * 8,width_per_group * 4))
         self.dual_define("t3",self.labels,LightDecoderBlock(width_per_group * 4,width_per_group * 4, 128))
@@ -1999,12 +1999,12 @@ class ResUNetContinus(nn.Module):
     def get_detach_var(self,x):
         return [t.detach() for t in x]
 
-    # @torchsnooper.snoop()
+                           
     def forward(self, x, freeze_backbone=False):
-        x1 = self.s1(x)  # 1,64,8,56,56
-        x2 = self.s2(x1)  # 1,256,8,56,56
-        x3 = self.s3(x2)  # 1,512,8,28, 28
-        x = self.s4(x3)  # 1,1024,8,14,14
+        x1 = self.s1(x)                
+        x2 = self.s2(x1)                 
+        x3 = self.s3(x2)                  
+        x = self.s4(x3)                  
         assert isinstance(freeze_backbone,bool)
         if freeze_backbone:
             x=self.get_detach_var(x)
@@ -2012,12 +2012,12 @@ class ResUNetContinus(nn.Module):
             x2=self.get_detach_var(x2)
             x3=self.get_detach_var(x3)
             
-        x = self.upsample(x) # 1,1024, 8, 28, 28
-        x = self.concat(x3,x)# 1,1024+512, 8, 28, 28
+        x = self.upsample(x)                    
+        x = self.concat(x3,x)                       
         x=[self.forward_branch(x,x1,x2,label) for label in self.labels]
         x=torch.cat(x,1)
         x=torch.sigmoid(x)
-        out = x.mean([3, 4]).view(-1, 1)*100 # 1,2,8,56,56
+        out = x.mean([3, 4]).view(-1, 1)*100              
         out = self.linear(out)
         out = out.view(x.size(0), -1)
         out = torch.sigmoid(out)
@@ -2026,14 +2026,14 @@ class ResUNetContinus(nn.Module):
 
     def forward_branch(self,x,x1,x2,label):
         t4= getattr(self,f"t4_{label}")
-        x = t4(x[0])# 1,256, 8, 28, 28
-        x = self.upsample([x]) # 1,256, 8, 56, 56
-        x = self.concat(x2,x)# 1,256+256, 8, 56, 56
+        x = t4(x[0])                  
+        x = self.upsample([x])                   
+        x = self.concat(x2,x)                      
         t3= getattr(self,f"t3_{label}")
-        x = t3(x[0]) # 1,128, 8, 56, 56
-        x = self.concat(x1,[x]) # 1,192, 8, 56, 56
+        x = t3(x[0])                   
+        x = self.concat(x1,[x])                   
         conv1x1=getattr(self,f"conv1x1_{label}")
-        x = conv1x1(x[0]) # 1,2,8,56,56
+        x = conv1x1(x[0])              
         return x
 
 
@@ -2041,28 +2041,28 @@ class ResUNetContinus(nn.Module):
 
 @MODEL_REGISTRY.register()
 class ResUNetCommon(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResUNetCommon, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -2077,13 +2077,13 @@ class ResUNetCommon(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         self.cfg = cfg
@@ -2175,25 +2175,25 @@ class ResUNetCommon(nn.Module):
             norm_module=self.norm_module,
         )
 
-        # self.s5 = resnet_helper.ResStage(
-        #     dim_in=[width_per_group * 16],
-        #     dim_out=[width_per_group * 32],
-        #     dim_inner=[dim_inner * 8],
-        #     temp_kernel_sizes=temp_kernel[4],
-        #     stride=cfg.RESNET.SPATIAL_STRIDES[3],
-        #     num_blocks=[d5],
-        #     num_groups=[num_groups],
-        #     num_block_temp_kernel=cfg.RESNET.NUM_BLOCK_TEMP_KERNEL[3],
-        #     nonlocal_inds=cfg.NONLOCAL.LOCATION[3],
-        #     nonlocal_group=cfg.NONLOCAL.GROUP[3],
-        #     nonlocal_pool=cfg.NONLOCAL.POOL[3],
-        #     instantiation=cfg.NONLOCAL.INSTANTIATION,
-        #     trans_func_name=cfg.RESNET.TRANS_FUNC,
-        #     stride_1x1=cfg.RESNET.STRIDE_1X1,
-        #     inplace_relu=cfg.RESNET.INPLACE_RELU,
-        #     dilation=cfg.RESNET.SPATIAL_DILATIONS[3],
-        #     norm_module=self.norm_module,
-        # )
+                                           
+                                            
+                                             
+                                        
+                                               
+                                                   
+                              
+                                      
+                                                                        
+                                                     
+                                                   
+                                                 
+                                                       
+                                                    
+                                               
+                                                   
+                                                       
+                                           
+           
         self.labels=cfg.RESNET.LABELS
         self.dual_define("t4",self.labels,LightDecoderBlock(width_per_group * 16,width_per_group * 8,width_per_group * 4))
         self.dual_define("t3",self.labels,LightDecoderBlock(width_per_group * 4,width_per_group * 4, 128))
@@ -2232,13 +2232,13 @@ class ResUNetCommon(nn.Module):
     def get_detach_var(self,x):
         return [t.detach() for t in x]
 
-    # @torchsnooper.snoop()
+                           
     def forward(self, x, freeze_backbone=False):
         x = self.get_detach_var(x)
-        x1 = self.s1(x)  # 1,64,8,56,56
-        x2 = self.s2(x1)  # 1,256,8,56,56
-        x3 = self.s3(x2)  # 1,512,8,28, 28
-        feat= self.s4(x3)  # 1,1024,8,14,14
+        x1 = self.s1(x)                
+        x2 = self.s2(x1)                 
+        x3 = self.s3(x2)                  
+        feat= self.s4(x3)                  
         assert isinstance(freeze_backbone,bool)
         if freeze_backbone:
             feat=self.get_detach_var(feat)
@@ -2246,12 +2246,12 @@ class ResUNetCommon(nn.Module):
             x2=self.get_detach_var(x2)
             x3=self.get_detach_var(x3)
             
-        feat = self.upsample(feat) # 1,1024, 8, 28, 28
-        feat = self.concat(x3,feat)# 1,1024+512, 8, 28, 28
+        feat = self.upsample(feat)                    
+        feat = self.concat(x3,feat)                       
         reg_out=[self.forward_branch(feat,x1,x2,label) for label in self.labels]
         reg_out=torch.cat(reg_out,1)
         reg_out=torch.sigmoid(reg_out)
-        class_out = reg_out.mean([3, 4]).view(-1, 1)*100 # 1,2,8,56,56
+        class_out = reg_out.mean([3, 4]).view(-1, 1)*100              
         class_out = self.linear(class_out)
         class_out = class_out.view(reg_out.size(0),len(self.labels),-1)
         class_out = class_out
@@ -2260,14 +2260,14 @@ class ResUNetCommon(nn.Module):
 
     def forward_branch(self,feat,x1,x2,label):
         t4= getattr(self,f"t4_{label}")
-        feat = t4(feat[0])# 1,256, 8, 28, 28
-        feat = self.upsample([feat]) # 1,256, 8, 56, 56
-        feat = self.concat(x2,feat)# 1,256+256, 8, 56, 56
+        feat = t4(feat[0])                  
+        feat = self.upsample([feat])                   
+        feat = self.concat(x2,feat)                      
         t3= getattr(self,f"t3_{label}")
-        feat = t3(feat[0]) # 1,128, 8, 56, 56
-        feat = self.concat(x1,[feat]) # 1,192, 8, 56, 56
+        feat = t3(feat[0])                   
+        feat = self.concat(x1,[feat])                   
         conv1x1=getattr(self,f"conv1x1_{label}")
-        feat = conv1x1(feat[0]) # 1,2,8,56,56
+        feat = conv1x1(feat[0])              
         return feat
 
 
@@ -2275,28 +2275,28 @@ class ResUNetCommon(nn.Module):
 
 @MODEL_REGISTRY.register()
 class ResUNetCommon2(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResUNetCommon2, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -2311,13 +2311,13 @@ class ResUNetCommon2(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         self.cfg = cfg
@@ -2409,25 +2409,25 @@ class ResUNetCommon2(nn.Module):
             norm_module=self.norm_module,
         )
 
-        # self.s5 = resnet_helper.ResStage(
-        #     dim_in=[width_per_group * 16],
-        #     dim_out=[width_per_group * 32],
-        #     dim_inner=[dim_inner * 8],
-        #     temp_kernel_sizes=temp_kernel[4],
-        #     stride=cfg.RESNET.SPATIAL_STRIDES[3],
-        #     num_blocks=[d5],
-        #     num_groups=[num_groups],
-        #     num_block_temp_kernel=cfg.RESNET.NUM_BLOCK_TEMP_KERNEL[3],
-        #     nonlocal_inds=cfg.NONLOCAL.LOCATION[3],
-        #     nonlocal_group=cfg.NONLOCAL.GROUP[3],
-        #     nonlocal_pool=cfg.NONLOCAL.POOL[3],
-        #     instantiation=cfg.NONLOCAL.INSTANTIATION,
-        #     trans_func_name=cfg.RESNET.TRANS_FUNC,
-        #     stride_1x1=cfg.RESNET.STRIDE_1X1,
-        #     inplace_relu=cfg.RESNET.INPLACE_RELU,
-        #     dilation=cfg.RESNET.SPATIAL_DILATIONS[3],
-        #     norm_module=self.norm_module,
-        # )
+                                           
+                                            
+                                             
+                                        
+                                               
+                                                   
+                              
+                                      
+                                                                        
+                                                     
+                                                   
+                                                 
+                                                       
+                                                    
+                                               
+                                                   
+                                                       
+                                           
+           
         self.labels=cfg.RESNET.LABELS
         self.dual_define("t4",self.labels,LightDecoderBlock(width_per_group * 16,width_per_group * 8,width_per_group * 4))
         self.dual_define("t3",self.labels,LightDecoderBlock(width_per_group * 4,width_per_group * 4, 128))
@@ -2466,13 +2466,13 @@ class ResUNetCommon2(nn.Module):
     def get_detach_var(self,x):
         return [t.detach() for t in x]
 
-    # @torchsnooper.snoop()
+                           
     def forward(self, x, freeze_backbone=False):
         x = self.get_detach_var(x)
-        x1 = self.s1(x)  # 1,64,8,56,56
-        x2 = self.s2(x1)  # 1,256,8,56,56
-        x3 = self.s3(x2)  # 1,512,8,28, 28
-        feat= self.s4(x3)  # 1,1024,8,14,14
+        x1 = self.s1(x)                
+        x2 = self.s2(x1)                 
+        x3 = self.s3(x2)                  
+        feat= self.s4(x3)                  
         assert isinstance(freeze_backbone,bool)
         if freeze_backbone:
             feat=self.get_detach_var(feat)
@@ -2480,12 +2480,12 @@ class ResUNetCommon2(nn.Module):
             x2=self.get_detach_var(x2)
             x3=self.get_detach_var(x3)
             
-        feat = self.upsample(feat) # 1,1024, 8, 28, 28
-        feat = self.concat(x3,feat)# 1,1024+512, 8, 28, 28
+        feat = self.upsample(feat)                    
+        feat = self.concat(x3,feat)                       
         reg_out=[self.forward_branch(feat,x1,x2,label) for label in self.labels]
         reg_out=torch.cat(reg_out,1)
         reg_out=torch.sigmoid(reg_out)
-        class_out = reg_out.mean([3, 4]).view(-1, 1)*100 # 1,2,8,56,56
+        class_out = reg_out.mean([3, 4]).view(-1, 1)*100              
         class_out = self.linear(class_out)
         class_out = class_out.view(reg_out.size(0),len(self.labels),-1)
         class_out = torch.sigmoid(class_out)
@@ -2494,42 +2494,42 @@ class ResUNetCommon2(nn.Module):
 
     def forward_branch(self,feat,x1,x2,label):
         t4= getattr(self,f"t4_{label}")
-        feat = t4(feat[0])# 1,256, 8, 28, 28
-        feat = self.upsample([feat]) # 1,256, 8, 56, 56
-        feat = self.concat(x2,feat)# 1,256+256, 8, 56, 56
+        feat = t4(feat[0])                  
+        feat = self.upsample([feat])                   
+        feat = self.concat(x2,feat)                      
         t3= getattr(self,f"t3_{label}")
-        feat = t3(feat[0]) # 1,128, 8, 56, 56
-        feat = self.concat(x1,[feat]) # 1,192, 8, 56, 56
+        feat = t3(feat[0])                   
+        feat = self.concat(x1,[feat])                   
         conv1x1=getattr(self,f"conv1x1_{label}")
-        feat = conv1x1(feat[0]) # 1,2,8,56,56
+        feat = conv1x1(feat[0])              
         return feat
 
 
 
 @MODEL_REGISTRY.register()
 class ResUNetStrong(nn.Module):
-    """
-    ResNet model builder. It builds a ResNet like network backbone without
-    lateral connection (C2D, I3D, Slow).
-
-    Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.
-    "SlowFast networks for video recognition."
-    https://arxiv.org/pdf/1812.03982.pdf
-
-    Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
-    "Non-local neural networks."
-    https://arxiv.org/pdf/1711.07971.pdf
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, cfg):
-        """
-        The `__init__` method of any subclass should also contain these
-            arguments.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+\
+           
         super(ResUNetStrong, self).__init__()
         self.norm_module = get_norm(cfg)
         self.enable_detection = cfg.DETECTION.ENABLE
@@ -2544,13 +2544,13 @@ class ResUNetStrong(nn.Module):
         )
 
     def _construct_network(self, cfg):
-        """
-        Builds a single pathway ResNet model.
-
-        Args:
-            cfg (CfgNode): model building configs, details are in the
-                comments of the config file.
-        """
+\
+\
+\
+\
+\
+\
+           
         assert cfg.MODEL.ARCH in _POOL1.keys()
         pool_size = _POOL1[cfg.MODEL.ARCH]
         self.cfg = cfg
@@ -2642,25 +2642,25 @@ class ResUNetStrong(nn.Module):
             norm_module=self.norm_module,
         )
 
-        # self.s5 = resnet_helper.ResStage(
-        #     dim_in=[width_per_group * 16],
-        #     dim_out=[width_per_group * 32],
-        #     dim_inner=[dim_inner * 8],
-        #     temp_kernel_sizes=temp_kernel[4],
-        #     stride=cfg.RESNET.SPATIAL_STRIDES[3],
-        #     num_blocks=[d5],
-        #     num_groups=[num_groups],
-        #     num_block_temp_kernel=cfg.RESNET.NUM_BLOCK_TEMP_KERNEL[3],
-        #     nonlocal_inds=cfg.NONLOCAL.LOCATION[3],
-        #     nonlocal_group=cfg.NONLOCAL.GROUP[3],
-        #     nonlocal_pool=cfg.NONLOCAL.POOL[3],
-        #     instantiation=cfg.NONLOCAL.INSTANTIATION,
-        #     trans_func_name=cfg.RESNET.TRANS_FUNC,
-        #     stride_1x1=cfg.RESNET.STRIDE_1X1,
-        #     inplace_relu=cfg.RESNET.INPLACE_RELU,
-        #     dilation=cfg.RESNET.SPATIAL_DILATIONS[3],
-        #     norm_module=self.norm_module,
-        # )
+                                           
+                                            
+                                             
+                                        
+                                               
+                                                   
+                              
+                                      
+                                                                        
+                                                     
+                                                   
+                                                 
+                                                       
+                                                    
+                                               
+                                                   
+                                                       
+                                           
+           
 
         self.labels=cfg.RESNET.LABELS
         self.dual_define("t4",self.labels,ResDecoderBlock(width_per_group * 16,width_per_group * 8,width_per_group * 8))
@@ -2700,13 +2700,13 @@ class ResUNetStrong(nn.Module):
     def get_detach_var(self,x):
         return [t.detach() for t in x]
 
-    # @torchsnooper.snoop()
+                           
     def forward(self, x, freeze_backbone=False):
         x = self.get_detach_var(x)
-        x1 = self.s1(x)  # 1,64,8,56,56
-        x2 = self.s2(x1)  # 1,256,8,56,56
-        x3 = self.s3(x2)  # 1,512,8,28, 28
-        feat= self.s4(x3)  # 1,1024,8,14,14
+        x1 = self.s1(x)                
+        x2 = self.s2(x1)                 
+        x3 = self.s3(x2)                  
+        feat= self.s4(x3)                  
         assert isinstance(freeze_backbone,bool)
         if freeze_backbone:
             feat=self.get_detach_var(feat)
@@ -2714,12 +2714,12 @@ class ResUNetStrong(nn.Module):
             x2=self.get_detach_var(x2)
             x3=self.get_detach_var(x3)
             
-        feat = self.upsample(feat) # 1,1024, 8, 28, 28
-        feat = self.concat(x3,feat)# 1,1024+512, 8, 28, 28
+        feat = self.upsample(feat)                    
+        feat = self.concat(x3,feat)                       
         reg_out=[self.forward_branch(feat,x1,x2,label) for label in self.labels]
         reg_out=torch.cat(reg_out,1)
         reg_out=torch.sigmoid(reg_out)
-        class_out = reg_out.mean([3, 4]).view(-1, 1)*100 # 1,2,8,56,56
+        class_out = reg_out.mean([3, 4]).view(-1, 1)*100              
         class_out = self.linear(class_out)
         class_out = class_out.view(reg_out.size(0),len(self.labels),-1)
         class_out = torch.sigmoid(class_out)
@@ -2728,12 +2728,12 @@ class ResUNetStrong(nn.Module):
 
     def forward_branch(self,feat,x1,x2,label):
         t4= getattr(self,f"t4_{label}")
-        feat = t4(feat[0])# 1,256, 8, 28, 28
-        feat = self.upsample([feat]) # 1,256, 8, 56, 56
-        feat = self.concat(x2,feat)# 1,256+256, 8, 56, 56
+        feat = t4(feat[0])                  
+        feat = self.upsample([feat])                   
+        feat = self.concat(x2,feat)                      
         t3= getattr(self,f"t3_{label}")
-        feat = t3(feat[0]) # 1,128, 8, 56, 56
-        feat = self.concat(x1,[feat]) # 1,192, 8, 56, 56
+        feat = t3(feat[0])                   
+        feat = self.concat(x1,[feat])                   
         conv1x1=getattr(self,f"conv1x1_{label}")
-        feat = conv1x1(feat[0]) # 1,2,8,56,56
+        feat = conv1x1(feat[0])              
         return feat

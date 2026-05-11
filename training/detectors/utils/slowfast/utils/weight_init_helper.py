@@ -1,20 +1,20 @@
-#!/usr/bin/env python3
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+                      
+                                                                       
 
-"""Utility function for weight initialization"""
+                                                
 
 import torch.nn as nn
 from fvcore.nn.weight_init import c2_msra_fill
 
 
 def init_weights(model, fc_init_std=0.01, zero_init_final_bn=True):
-    """
-    Performs ResNet style weight initialization.
-    Args:
-        fc_init_std (float): the expected standard deviation for fc layer.
-        zero_init_final_bn (bool): if True, zero initialize the final bn for
-            every bottleneck.
-    """
+\
+\
+\
+\
+\
+\
+       
     for m in model.modules():
         if isinstance(m, nn.Conv3d):
             """

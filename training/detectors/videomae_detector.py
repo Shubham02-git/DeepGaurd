@@ -40,19 +40,19 @@ class VideoMAEDetector(AbstractDetector):
 
     
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         loss_func = loss_class()
         return loss_func
     
     def features(self, data_dict: dict) -> torch.Tensor:
-        # b, t, c, h, w = data_dict['image'].shape
-        # frame_input = data_dict['image'].reshape(-1, c, h, w)
-        # # get frame-level features
-        # frame_level_features = self.backbone.features(frame_input)
-        # frame_level_features = F.adaptive_avg_pool2d(frame_level_features, (1, 1)).reshape(b, t, -1)
-        # # get video-level features
-        # video_level_features = self.temporal_module(frame_level_features)[0][:, -1, :]
+                                                  
+                                                               
+                                    
+                                                                    
+                                                                                                      
+                                    
+                                                                                        
 
         outputs = self.backbone(data_dict['image'], output_hidden_states=True)
         sequence_output = outputs[0]
@@ -72,21 +72,21 @@ class VideoMAEDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         metric_batch_dict = {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
-        # we dont compute the video-level metrics for training
+                                                              
         self.video_names = []
         return metric_batch_dict
     
     def forward(self, data_dict: dict, inference=False) -> dict:
-        # get the features by backbone
+                                      
         features = self.features(data_dict)
-        # get the prediction by classifier
+                                          
         pred = self.classifier(features)
-        # get the probability of the pred
+                                         
         prob = torch.softmax(pred, dim=1)[:, 1]
-        # build the prediction dict for each output
+                                                   
         pred_dict = {'cls': pred, 'prob': prob, 'feat': features}
         
         return pred_dict

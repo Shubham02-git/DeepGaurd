@@ -26,8 +26,8 @@ def build_model(model_name='ir_50'):
         raise ValueError('not a correct model name', model_name)
 
 def initialize_weights(modules):
-    """ Weight initilize, conv2d and linear is initialized with kaiming_normal
-    """
+\
+       
     for m in modules:
         if isinstance(m, nn.Conv2d):
             nn.init.kaiming_normal_(m.weight,
@@ -47,15 +47,15 @@ def initialize_weights(modules):
 
 
 class Flatten(Module):
-    """ Flat tensor
-    """
+\
+       
     def forward(self, input):
         return input.view(input.size(0), -1)
 
 
 class LinearBlock(Module):
-    """ Convolution block without no-linear activation layer
-    """
+\
+       
     def __init__(self, in_c, out_c, kernel=(1, 1), stride=(1, 1), padding=(0, 0), groups=1):
         super(LinearBlock, self).__init__()
         self.conv = Conv2d(in_c, out_c, kernel, stride, padding, groups=groups, bias=False)
@@ -68,8 +68,8 @@ class LinearBlock(Module):
 
 
 class GNAP(Module):
-    """ Global Norm-Aware Pooling block
-    """
+\
+       
     def __init__(self, in_c):
         super(GNAP, self).__init__()
         self.bn1 = BatchNorm2d(in_c, affine=False)
@@ -89,8 +89,8 @@ class GNAP(Module):
 
 
 class GDC(Module):
-    """ Global Depthwise Convolution block
-    """
+\
+       
     def __init__(self, in_c, embedding_size):
         super(GDC, self).__init__()
         self.conv_6_dw = LinearBlock(in_c, in_c,
@@ -111,8 +111,8 @@ class GDC(Module):
 
 
 class SEModule(Module):
-    """ SE block
-    """
+\
+       
     def __init__(self, channels, reduction):
         super(SEModule, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
@@ -140,8 +140,8 @@ class SEModule(Module):
 
 
 class BasicBlockIR(Module):
-    """ BasicBlock for IRNet
-    """
+\
+       
     def __init__(self, in_channel, depth, stride):
         super(BasicBlockIR, self).__init__()
         if in_channel == depth:
@@ -166,8 +166,8 @@ class BasicBlockIR(Module):
 
 
 class BottleneckIR(Module):
-    """ BasicBlock with bottleneck for IRNet
-    """
+\
+       
     def __init__(self, in_channel, depth, stride):
         super(BottleneckIR, self).__init__()
         reduction_channel = depth // 4
@@ -208,7 +208,7 @@ class BottleneckIRSE(BottleneckIR):
 
 
 class Bottleneck(namedtuple('Block', ['in_channel', 'depth', 'stride'])):
-    '''A named tuple describing a ResNet block.'''
+    pass
 
 
 def get_block(in_channel, depth, num_units, stride=2):
@@ -266,17 +266,17 @@ def get_blocks(num_layers):
 
 class Backbone(Module):
     def __init__(self, input_size, num_layers, mode='ir'):
-        """ Args:
-            input_size: input_size of backbone
-            num_layers: num_layers of backbone
-            mode: support ir or irse
-        """
+\
+\
+\
+\
+           
         super(Backbone, self).__init__()
-        assert input_size[0] in [112, 224], \
+        assert input_size[0] in [112, 224],\
             "input_size should be [112, 112] or [224, 224]"
-        assert num_layers in [18, 34, 50, 100, 152, 200], \
+        assert num_layers in [18, 34, 50, 100, 152, 200],\
             "num_layers should be 18, 34, 50, 100 or 152"
-        assert mode in ['ir', 'ir_se'], \
+        assert mode in ['ir', 'ir_se'],\
             "mode should be ir or ir_se"
         self.input_layer = Sequential(Conv2d(3, 64, (3, 3), 1, 1, bias=False),
                                       BatchNorm2d(64), PReLU(64))
@@ -318,8 +318,8 @@ class Backbone(Module):
 
     def forward(self, x):
         
-        # current code only supports one extra image
-        # it comes with a extra dimension for number of extra image. We will just squeeze it out for now
+                                                    
+                                                                                                        
         x = self.input_layer(x)
 
         for idx, module in enumerate(self.body):
@@ -334,80 +334,80 @@ class Backbone(Module):
 
 
 def IR_18(input_size):
-    """ Constructs a ir-18 model.
-    """
+\
+       
     model = Backbone(input_size, 18, 'ir')
 
     return model
 
 
 def IR_34(input_size):
-    """ Constructs a ir-34 model.
-    """
+\
+       
     model = Backbone(input_size, 34, 'ir')
 
     return model
 
 
 def IR_50(input_size):
-    """ Constructs a ir-50 model.
-    """
+\
+       
     model = Backbone(input_size, 50, 'ir')
 
     return model
 
 
 def IR_101(input_size):
-    """ Constructs a ir-101 model.
-    """
+\
+       
     model = Backbone(input_size, 100, 'ir')
 
     return model
 
 
 def IR_152(input_size):
-    """ Constructs a ir-152 model.
-    """
+\
+       
     model = Backbone(input_size, 152, 'ir')
 
     return model
 
 
 def IR_200(input_size):
-    """ Constructs a ir-200 model.
-    """
+\
+       
     model = Backbone(input_size, 200, 'ir')
 
     return model
 
 
 def IR_SE_50(input_size):
-    """ Constructs a ir_se-50 model.
-    """
+\
+       
     model = Backbone(input_size, 50, 'ir_se')
 
     return model
 
 
 def IR_SE_101(input_size):
-    """ Constructs a ir_se-101 model.
-    """
+\
+       
     model = Backbone(input_size, 100, 'ir_se')
 
     return model
 
 
 def IR_SE_152(input_size):
-    """ Constructs a ir_se-152 model.
-    """
+\
+       
     model = Backbone(input_size, 152, 'ir_se')
 
     return model
 
 
 def IR_SE_200(input_size):
-    """ Constructs a ir_se-200 model.
-    """
+\
+       
     model = Backbone(input_size, 200, 'ir_se')
 
     return model

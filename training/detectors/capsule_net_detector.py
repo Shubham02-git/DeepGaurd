@@ -28,7 +28,7 @@ class CapsuleNetDetector(AbstractDetector):
         self.config = config
         self.backbone = self.build_backbone(config)
         self.loss_func = self.build_loss(config)
-        #capsule net
+                    
         self.num_classes = config['num_classes']
         self.vgg_ext = VggExtractor()
         self.fea_ext = FeatureExtractor()
@@ -38,10 +38,10 @@ class CapsuleNetDetector(AbstractDetector):
         self.routing_stats = RoutingLayer(num_input_capsules=self.NO_CAPS, num_output_capsules= self.num_classes, data_in=8, data_out=4, num_iterations=2)
 
     def build_backbone(self, config):
-        ...  # do not need one specific backbone for capsule net
+        ...                                                     
     
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         loss_func = loss_class()
         return loss_func
@@ -53,7 +53,7 @@ class CapsuleNetDetector(AbstractDetector):
 
     def classifier(self, features: torch.tensor) -> torch.tensor:
         z = self.routing_stats(features, random = False, dropout = 0.0)
-                # z[b, data, out_caps]
+                                      
         classes = F.softmax(z, dim=-1)
         class_ = classes.detach()
         class_ = class_.mean(dim=1)
@@ -70,19 +70,19 @@ class CapsuleNetDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         metric_batch_dict = {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
         return metric_batch_dict
 
     def forward(self, data_dict: dict, inference=False) -> dict:
-        # get the features by backbone
+                                      
         features = self.features(data_dict)
-        # get the prediction by classifier
+                                          
         preds, pred = self.classifier(features)
-        # get the probability of the pred
+                                         
         prob = torch.softmax(pred, dim=1)[:, 1]
-        # build the prediction dict for each output
+                                                   
         pred_dict = {'cls': pred, 'prob': prob, 'feat': features, 'classes': preds}
         return pred_dict
 
@@ -94,7 +94,7 @@ class CapsuleNetDetector(AbstractDetector):
             m.weight.data.normal_(1.0, 0.02)
             m.bias.data.fill_(0)
 
-# VGG input(10,3,256,256)
+                         
 class VggExtractor(nn.Module):
     def __init__(self, train=False):
         super(VggExtractor, self).__init__()
@@ -119,7 +119,7 @@ class VggExtractor(nn.Module):
 class FeatureExtractor(nn.Module):
     def __init__(self):
         super(FeatureExtractor, self).__init__()
-        self.NO_CAPS = 10 ##mark yxh
+        self.NO_CAPS = 10           
         self.capsules = nn.ModuleList([
             nn.Sequential(
                 nn.Conv2d(256, 64, kernel_size=3, stride=1, padding=1),
@@ -145,8 +145,8 @@ class FeatureExtractor(nn.Module):
         return scale * tensor / (torch.sqrt(squared_norm))
 
     def forward(self, x):
-        # outputs = [capsule(x.detach()) for capsule in self.capsules]
-        # outputs = [capsule(x.clone()) for capsule in self.capsules]
+                                                                      
+                                                                     
         outputs = [capsule(x) for capsule in self.capsules]
         output = torch.stack(outputs, dim=-1)
 
@@ -172,7 +172,7 @@ class View(nn.Module):
     def forward(self, input):
         return input.view(self.shape)
 
-# Capsule right Dynamic routing
+                               
 class RoutingLayer(nn.Module):
     def __init__(self, num_input_capsules, num_output_capsules, data_in, data_out, num_iterations):
         super(RoutingLayer, self).__init__()
@@ -187,13 +187,13 @@ class RoutingLayer(nn.Module):
         return scale * tensor / (torch.sqrt(squared_norm))
 
     def forward(self, x, random, dropout):
-        # x[b, data, in_caps]
+                             
 
         x = x.transpose(2, 1)
-        # x[b, in_caps, data]
+                             
 
         if random:
-            # noise = torch.Tensor(0.01*torch.randn(*self.route_weights.size())).cuda()
+                                                                                       
             noise = torch.Tensor(0.01*torch.randn(*self.route_weights.size())).cuda()
             route_weights = self.route_weights + noise
         else:
@@ -201,22 +201,22 @@ class RoutingLayer(nn.Module):
 
         priors = route_weights[:, None, :, :, :] @ x[None, :, :, :, None]
 
-        # route_weights [out_caps , 1 , in_caps , data_out , data_in]
-        # x             [   1     , b , in_caps , data_in ,    1    ]
-        # priors        [out_caps , b , in_caps , data_out,    1    ]
+                                                                     
+                                                                     
+                                                                     
 
         priors = priors.transpose(1, 0)
-        # priors[b, out_caps, in_caps, data_out, 1]
+                                                   
 
         if dropout > 0.0:
-            # drop = torch.Tensor(torch.FloatTensor(*priors.size()).bernoulli(1.0- dropout)).cuda()
+                                                                                                   
             drop = torch.Tensor(torch.FloatTensor(*priors.size()).bernoulli(1.0- dropout)).cuda()
             priors = priors * drop
             
 
-        # logits = torch.Tensor(torch.zeros(*priors.size())).cuda()
+                                                                   
         logits = torch.Tensor(torch.zeros(*priors.size())).to(priors.device)
-        # logits[b, out_caps, in_caps, data_out, 1]
+                                                   
 
         num_iterations = self.num_iterations
 
@@ -228,13 +228,13 @@ class RoutingLayer(nn.Module):
                 delta_logits = priors * outputs
                 logits = logits + delta_logits
 
-        # outputs[b, out_caps, 1, data_out, 1]
+                                              
         outputs = outputs.squeeze()
 
         if len(outputs.shape) == 3:
             outputs = outputs.transpose(2, 1).contiguous() 
         else:
             outputs = outputs.unsqueeze_(dim=0).transpose(2, 1).contiguous()
-        # outputs[b, data_out, out_caps]
+                                        
 
         return outputs

@@ -7,7 +7,7 @@ __all__ = ['iresnet18', 'iresnet34', 'iresnet50', 'iresnet100', 'iresnet200']
 using_ckpt = False
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
-    """3x3 convolution with padding"""
+                                      
     return nn.Conv2d(in_planes,
                      out_planes,
                      kernel_size=3,
@@ -19,7 +19,7 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
 
 
 def conv1x1(in_planes, out_planes, stride=1):
-    """1x1 convolution"""
+                         
     return nn.Conv2d(in_planes,
                      out_planes,
                      kernel_size=1,

@@ -34,7 +34,7 @@ class Block(nn.Module):
         rep = []
 
         filters = in_filters
-        if grow_first:  # whether the number of filters grows first
+        if grow_first:                                             
             rep.append(self.relu)
             rep.append(SeparableConv2d(in_filters, out_filters,
                                        3, stride=1, padding=1, bias=False))
@@ -86,31 +86,31 @@ class SeparableConv2d(nn.Module):
     return x
 
 class Xception_SLADDSyn(nn.Module):
-    """
-    Xception optimized for the ImageNet dataset, as specified in
-    https://arxiv.org/pdf/1610.02357.pdf
-    """
+\
+\
+\
+       
 
     def __init__(self, num_classes=2, num_region=7, num_type=2, num_mag=1, inc=6):
-        """ Constructor
-        Args:
-            num_classes: number of classes
-        """
+\
+\
+\
+           
         super(Xception_SLADDSyn, self).__init__()
         self.num_region = num_region
         self.num_type = num_type
         self.num_mag = num_mag
         dropout = 0.5
 
-        # Entry flow
+                    
         self.iniconv = nn.Conv2d(inc, 32, 3, 2, 0, bias=False)
-        # self.conv1 = nn.Conv2d(inc, 32, 3, 2, 0, bias=False)
+                                                              
         self.bn1 = nn.BatchNorm2d(32)
         self.relu = nn.ReLU(inplace=True)
 
         self.conv2 = nn.Conv2d(32, 64, 3, bias=False)
         self.bn2 = nn.BatchNorm2d(64)
-        # do relu here
+                      
 
         self.block1 = Block(
             64, 128, 2, 2, start_with_relu=False, grow_first=True)
@@ -119,7 +119,7 @@ class Xception_SLADDSyn(nn.Module):
         self.block3 = Block(
             256, 728, 2, 2, start_with_relu=True, grow_first=True)
 
-        # middle flow
+                     
         self.block4 = Block(
             728, 728, 3, 1, start_with_relu=True, grow_first=True)
         self.block5 = Block(
@@ -138,14 +138,14 @@ class Xception_SLADDSyn(nn.Module):
         self.block11 = Block(
             728, 728, 3, 1, start_with_relu=True, grow_first=True)
 
-        # Exit flow
+                   
         self.block12 = Block(
             728, 1024, 2, 2, start_with_relu=True, grow_first=False)
 
         self.conv3 = SeparableConv2d(1024, 1536, 3, 1, 1)
         self.bn3 = nn.BatchNorm2d(1536)
 
-        # do relu here
+                      
         self.conv4 = SeparableConv2d(1536, 2048, 3, 1, 1)
         self.bn4 = nn.BatchNorm2d(2048)
         self.fc_region = nn.Sequential(nn.Dropout(p=dropout), nn.Linear(2048, num_region))
@@ -246,14 +246,14 @@ def mask_postprocess(mask):
     def blur_mask(mask):
         blur_k = 2 * np.random.randint(1, 10) - 1
 
-        # kernel = np.ones((blur_k+1, blur_k+1), np.uint8)
-        # mask = cv2.erode(mask, kernel)
+                                                          
+                                        
 
         mask = cv2.GaussianBlur(mask, (blur_k, blur_k), 0)
 
         return mask
 
-    # random erode/dilate
+                         
     prob = np.random.rand()
     if prob < 0.3:
         erode_k = 2 * np.random.randint(1, 10) + 1
@@ -264,7 +264,7 @@ def mask_postprocess(mask):
         kernel = np.ones((erode_k, erode_k), np.uint8)
         mask = cv2.dilate(mask, kernel)
 
-    # random blur
+                 
     if np.random.rand() < 0.9:
         mask = blur_mask(mask)
 
@@ -277,21 +277,21 @@ def xception(num_region=7, num_type=2, num_mag=1, pretrained='imagenet', inc=6):
 
 
 class TransferModel(nn.Module):
-    """
-    Simple transfer learning model that takes an imagenet pretrained model with
-    a fc layer as base model and retrains a new fc layer for num_out_classes
-    """
+\
+\
+\
+       
 
     def __init__(self, config, num_region=7, num_type=2, num_mag=1, return_fea=False, inc=6):
         super(TransferModel, self).__init__()
         self.return_fea = return_fea
         def return_pytorch04_xception(pretrained=True):
-            # Raises warning "src not broadcastable to dst" but thats fine
+                                                                          
             model = xception(num_region=num_region, num_type=num_type, num_mag=num_mag, inc=inc, pretrained=False)
             if pretrained:
-                # Load model in torch 0.4+
-                # model.fc = model.last_linear
-                # del model.last_linear
+                                          
+                                              
+                                       
                 state_dict = torch.load(config['pretrained'])
                 print('Loaded pretrained model (ImageNet)....')
                 for name, weights in state_dict.items():
@@ -299,26 +299,26 @@ class TransferModel(nn.Module):
                         state_dict[name] = weights.unsqueeze(
                             -1).unsqueeze(-1)
                 model.load_state_dict(state_dict, strict=False)
-                # model.last_linear = model.fc
-                # del model.fc
+                                              
+                              
             return model
 
         self.model = return_pytorch04_xception()
-        # Replace fc
+                    
 
         if inc != 3:
             self.model.iniconv = nn.Conv2d(inc, 32, 3, 2, 0, bias=False)
             nn.init.xavier_normal(self.model.iniconv.weight.data, gain=0.02)
 
     def set_trainable_up_to(self, boolean=False, layername="Conv2d_4a_3x3"):
-        """
-        Freezes all layers below a specific layer and sets the following layers
-        to true if boolean else only the fully connected final layer
-        :param boolean:
-        :param layername: depends on lib, for inception e.g. Conv2d_4a_3x3
-        :return:
-        """
-        # Stage-1: freeze all the layers
+\
+\
+\
+\
+\
+\
+           
+                                        
         if layername is None:
             for i, param in self.model.named_parameters():
                 param.requires_grad = True
@@ -327,7 +327,7 @@ class TransferModel(nn.Module):
             for i, param in self.model.named_parameters():
                 param.requires_grad = False
         if boolean:
-            # Make all layers following the layername layer trainable
+                                                                     
             ct = []
             found = False
             for name, child in self.model.named_children():
@@ -340,7 +340,7 @@ class TransferModel(nn.Module):
                 raise NotImplementedError('Layer not found, cant finetune!'.format(
                     layername))
         else:
-            # Make fc trainable
+                               
             for param in self.model.last_linear.parameters():
                 param.requires_grad = True
 
@@ -403,7 +403,7 @@ def random_deform(mask, nrows, ncols, mean=0, std=10):
 
 
 def get_five_key(landmarks_68):
-    # get the five key points by using the landmarks
+                                                    
     leye_center = (landmarks_68[36] + landmarks_68[39]) * 0.5
     reye_center = (landmarks_68[42] + landmarks_68[45]) * 0.5
     nose = landmarks_68[33]
@@ -420,7 +420,7 @@ def get_five_key(landmarks_68):
 
 
 def remove_eyes(image, landmarks, opt):
-    ##l: left eye; r: right eye, b: both eye
+                                            
     if opt == 'l':
         (x1, y1), (x2, y2) = landmarks[5:7]
     elif opt == 'r':
@@ -463,15 +463,15 @@ def remove_mouth(image, landmarks):
 
 
 def blend_fake_to_real(realimg, real_lmk, fakeimg, fakemask, fake_lmk, deformed_fakemask, type, mag):
-    # source: fake image
-    # target: real image
+                        
+                        
     realimg = ((realimg + 1) / 2 * 255).astype(np.uint8)
     fakeimg = ((fakeimg + 1) / 2 * 255).astype(np.uint8)
     H, W, C = realimg.shape
-    #由于我们已经做过对齐，这里可以直接用。原代码是做了对齐操作的. 这个src就是fake
+                                                
     aligned_src = fakeimg
     src_mask = deformed_fakemask
-    src_mask = src_mask > 0  # (H, W)
+    src_mask = src_mask > 0          
 
     tgt_mask = np.asarray(src_mask, dtype=np.uint8)
     tgt_mask = mask_postprocess(tgt_mask)
@@ -575,7 +575,7 @@ class synthesizer(nn.Module):
         return entropy, selected_log_prob[:, 0], action[:, 0]
 
     def forward(self, img, fake_img, real_lmk, fake_lmk, real_mask, fake_mask, label=None):
-        # based on pair_dataset, here, img always is real, fake_img always is fake
+                                                                                  
         region_num, type_num, mag = self.netG(torch.cat((img, fake_img), 1))
         reg_etp, reg_log_prob, reg = self.calculate(region_num)
         type_etp, type_log_prob, type = self.calculate(type_num)
@@ -586,7 +586,7 @@ class synthesizer(nn.Module):
         typelabel = []
         maglabel = []
         magmask = []
-        #####################
+                             
         alt_img = torch.ones(img.shape)
         alt_mask = np.zeros((img.shape[0], 16, 16))
         if label is None:
@@ -594,7 +594,7 @@ class synthesizer(nn.Module):
         for i in range(img.shape[0]):
             imgcp = np.transpose(img[i].cpu().numpy(), (1, 2, 0)).copy()
             fake_imgcp = np.transpose(fake_img[i].cpu().numpy(), (1, 2, 0)).copy()
-            ##only work for real imgs and not do-nothing choice
+                                                               
             if label[i] == 0 and type[i] != 3:
                 mask = self.parse(fake_imgcp, reg[i], fake_lmk[i].cpu().numpy(),
                                   fake_mask[i].cpu().numpy())
@@ -629,7 +629,7 @@ class synthesizer(nn.Module):
         typelabel = torch.tensor(typelabel)
         maglabel = mag
         magmask = torch.tensor(magmask)
-        return log_prob, entropy, alt_img.detach(), alt_mask.detach(), \
+        return log_prob, entropy, alt_img.detach(), alt_mask.detach(),\
             newlabel.detach(), typelabel.detach(), maglabel.detach(), magmask.detach()
 
 
@@ -646,7 +646,7 @@ if __name__ == '__main__':
     config['use_data_augmentation']=True
     config['data_aug']['rotate_prob']=1
     train_set = pairDataset(config=config, mode='train')
-    train_data_loader = \
+    train_data_loader =\
         torch.utils.data.DataLoader(
             dataset=train_set,
             batch_size=config['train_batchSize'],
@@ -660,7 +660,7 @@ if __name__ == '__main__':
         imgs,lmks,msks=batch['image'].cuda(),batch['landmark'].cuda(),batch['mask'].cuda()
         half = len(imgs) // 2
         img, fake_img, real_lmk, fake_lmk, real_mask, fake_mask = imgs[:half],imgs[half:],lmks[:half],lmks[half:],msks[:half],msks[half:]
-        log_prob, entropy, new_img, alt_mask, label, type_label, mag_label, mag_mask = \
+        log_prob, entropy, new_img, alt_mask, label, type_label, mag_label, mag_mask =\
         syn(img, fake_img, real_lmk, fake_lmk, real_mask, fake_mask)
 
         if iteration > 10:

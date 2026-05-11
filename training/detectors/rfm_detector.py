@@ -33,11 +33,11 @@ class RFMDetector(AbstractDetector):
         self.loss_func = self.build_loss(config)
 
     def build_backbone(self, config):
-        # prepare the backbone
+                              
         backbone_class = BACKBONE[config['backbone_name']]
         model_config = config['backbone_config']
         backbone = backbone_class(model_config)
-        # if donot load the pretrained weights, fail to get good results
+                                                                        
         state_dict = torch.load(config['pretrained'])
         for name, weights in state_dict.items():
             if 'pointwise' in name:
@@ -48,13 +48,13 @@ class RFMDetector(AbstractDetector):
         return backbone
 
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         loss_func = loss_class()
         return loss_func
     
     def features(self, data_dict: dict) -> torch.Tensor:
-        return self.backbone.features(data_dict['image']) #32,3,256,256
+        return self.backbone.features(data_dict['image'])              
 
     def classifier(self, features: torch.Tensor) -> torch.Tensor:
         return self.backbone.classifier(features)
@@ -68,7 +68,7 @@ class RFMDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         return {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
     
@@ -87,12 +87,12 @@ class RFMDetector(AbstractDetector):
         device = data.device
         self.backbone.eval()
 
-        # 直接调用 self.cal_fam 而非 cal_fam
+                                      
         mask = self.cal_fam(data)
         imgmask = torch.ones_like(mask)
         imgh, imgw = 256, 256
         
-        # Apply the mask based on FAM
+                                     
         for i in range(len(mask)):
             maxind = np.argsort(mask[i].cpu().numpy().flatten())[::-1]
             pointcnt = 0
@@ -119,7 +119,7 @@ class RFMDetector(AbstractDetector):
                     if pointcnt >= 3:
                         break
                     
-        # Apply the masked data
+                               
         data = imgmask * data + (1 - imgmask) * (torch.rand_like(data) * 2 - 1)
         
         self.backbone.train()
@@ -129,17 +129,17 @@ class RFMDetector(AbstractDetector):
 
     def forward(self, data_dict: dict, inference=False) -> dict:
         if not inference:
-            # 非推理阶段，应用 RFM 增强
+                             
             data_dict['image'] = self.apply_rfm_augmentation(data_dict['image'])
         
 
-        # get the features by backbone
+                                      
         features = self.features(data_dict)
-        # get the prediction by classifier
+                                          
         pred = self.classifier(features)
-        # get the probability of the pred
+                                         
         prob = torch.softmax(pred, dim=1)[:, 1]
-        # build the prediction dict for each output
+                                                   
         pred_dict = {'cls': pred, 'prob': prob, 'feat': features}
 
         return pred_dict

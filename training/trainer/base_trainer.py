@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 
 
 class BaseTrainer(ABC):
-    """
-    """
+\
+       
 
     def __init__(
         self, 
@@ -15,7 +15,7 @@ class BaseTrainer(ABC):
         scheduler,
         writer,
         ):
-        # check if all the necessary components are implemented
+                                                               
         if config is None or model is None or optimizer is None or scheduler is None or writer is None:
             raise NotImplementedError("config, model, optimizier, scheduler, and tensorboard writer must be implemented")
         

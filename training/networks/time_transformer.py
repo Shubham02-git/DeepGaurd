@@ -117,7 +117,7 @@ class ViT(nn.Module):
 
     def forward(self, img, mask = None):
         x = self.to_patch_embedding(img)
-        b, n, _ = x.shape #batch,num_patches,channels  #
+        b, n, _ = x.shape                               
 
         cls_tokens = repeat(self.cls_token, '() n d -> b n d', b = b)
         x = torch.cat((cls_tokens, x), dim=1)
@@ -149,7 +149,7 @@ class RandomSelect(nn.Module):
         super().__init__()
 
     def forward(self, x):
-        # batch,7x7
+                   
         size=x.shape[1]
         h=int(sqrt(size))
         candidates = list(range(size))
@@ -199,7 +199,7 @@ class VideoiT(nn.Module):
         n=x.shape[1]
         x=x.reshape(real_b*n,self.num_patches,-1)
         x = self.patch_to_embedding(x)
-        b, n, _ = x.shape #batch,num_patches,channels  #
+        b, n, _ = x.shape                               
 
         cls_tokens = repeat(self.cls_token, '() n d -> b n d', b = b)
         x = torch.cat((cls_tokens, x), dim=1)
@@ -237,7 +237,7 @@ class TimeTransformer(nn.Module):
         )
 
     def forward(self, x):
-        b, n, _ = x.shape #batch,num_patches,channels  #
+        b, n, _ = x.shape                               
 
         cls_tokens = repeat(self.cls_token, '() n d -> b n d', b = b)
         x = torch.cat((cls_tokens, x), dim=1)

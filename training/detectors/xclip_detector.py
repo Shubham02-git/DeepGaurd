@@ -18,7 +18,7 @@ class XCLIPDetector(AbstractDetector):
         self.config = config
         self.backbone = self.build_backbone(config)
         self.fc_norm = nn.LayerNorm(768)
-        # self.temporal_module = self.build_temporal_module(config)
+                                                                   
         self.head = nn.Linear(768, 2)
         self.loss_func = self.build_loss(config)
 
@@ -32,20 +32,20 @@ class XCLIPDetector(AbstractDetector):
         return nn.LSTM(input_size=2048, hidden_size=512, num_layers=3, batch_first=True)
 
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         loss_func = loss_class()
 
         return loss_func
 
     def features(self, data_dict: dict) -> torch.Tensor:
-        # b, t, c, h, w = data_dict['image'].shape
-        # frame_input = data_dict['image'].reshape(-1, c, h, w)
-        # # get frame-level features
-        # frame_level_features = self.backbone.features(frame_input)
-        # frame_level_features = F.adaptive_avg_pool2d(frame_level_features, (1, 1)).reshape(b, t, -1)
-        # # get video-level features
-        # video_level_features = self.temporal_module(frame_level_features)[0][:, -1, :]
+                                                  
+                                                               
+                                    
+                                                                    
+                                                                                                      
+                                    
+                                                                                        
 
         batch_size, num_frames, num_channels, height, width = data_dict['image'].shape
         pixel_values = data_dict['image'].reshape(-1, num_channels, height, width)

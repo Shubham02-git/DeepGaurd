@@ -1,6 +1,6 @@
 import random
 
-import kornia  # type: ignore
+import kornia                
 import numpy as np
 import torch
 import torch.nn as nn
@@ -46,7 +46,7 @@ class MultiAttentionDetector(AbstractDetector):
 
         self.attention_generation = AttentionMap(self.num_attention_features, self.num_attentions)
         self.attention_pooling = AttentionPooling()
-        self.texture_enhance = TextureEnhanceV1(self.num_shallow_features, self.num_attentions)  # Todo
+        self.texture_enhance = TextureEnhanceV1(self.num_shallow_features, self.num_attentions)        
         self.num_enhanced_features = self.texture_enhance.output_features
         self.num_features_d = self.texture_enhance.output_features_d
         self.projection_local = nn.Sequential(nn.Linear(self.num_attentions * self.num_enhanced_features, self.mid_dim),
@@ -115,7 +115,7 @@ class MultiAttentionDetector(AbstractDetector):
         return layer_output
 
     def classifier(self, features: torch.Tensor) -> None:
-        pass  # do not overwrite this, since classifier structure has been written in self.forward()
+        pass                                                                                        
 
     def get_losses(self, data_dict: dict, pred_dict: dict) -> dict:
         if self.batch_cnt <= self.config["backbone_nEpochs"] * self.config["batch_per_epoch"]:
@@ -152,19 +152,19 @@ class MultiAttentionDetector(AbstractDetector):
                     "prob": prob,
                     "feat": layer_output["final"]}
 
-        if not inference:  # use AGDA when training
+        if not inference:                          
             with torch.no_grad():
                 layer_output = self.features(data_dict)
                 raw_attentions = layer_output[self.attention_layer]
                 attention_maps = self.attention_generation(raw_attentions)
                 data_dict["image"], _ = self.AGDA.agda(data_dict["image"], attention_maps)
 
-        # Get Attention Maps
+                            
         layer_output = self.features(data_dict)
         raw_attentions = layer_output[self.attention_layer]
         attention_maps = self.attention_generation(raw_attentions)
 
-        # Get Textural Feature Matrix P
+                                       
         shallow_features = layer_output[self.feature_layer]
         enhanced_features, feature_maps_d = self.texture_enhance(shallow_features, attention_maps)
         textural_feature_matrix_p = self.attention_pooling(enhanced_features, attention_maps)
@@ -172,18 +172,18 @@ class MultiAttentionDetector(AbstractDetector):
         feature_matrix = self.dropout(textural_feature_matrix_p).view(B, -1)
         feature_matrix = self.projection_local(feature_matrix)
 
-        # Get Global Feature G
+                              
         final = layer_output["final"]
-        attention_maps2 = attention_maps.sum(dim=1, keepdim=True)  # [B, 1, H_A, W_A]
-        final = self.attention_pooling(final, attention_maps2, norm=1).squeeze(1)  # [B, C_F]
+        attention_maps2 = attention_maps.sum(dim=1, keepdim=True)                    
+        final = self.attention_pooling(final, attention_maps2, norm=1).squeeze(1)            
         final = self.projection_final(final)
         final = F.hardswish(final)
 
-        # Get the Prediction by Ensemble Classifier
-        feature_matrix = torch.cat((feature_matrix, final), dim=1)  # [B, 2 * mid_dim]
-        pred = self.ensemble_classifier_fc(feature_matrix)  # [B, 2]
+                                                   
+        feature_matrix = torch.cat((feature_matrix, final), dim=1)                    
+        pred = self.ensemble_classifier_fc(feature_matrix)          
 
-        # Get probability
+                         
         prob = torch.softmax(pred, dim=1)[:, 1]
 
         return {"cls": pred,
@@ -197,7 +197,7 @@ class AttentionMap(nn.Module):
     def __init__(self, in_channels, num_attention):
         super(AttentionMap, self).__init__()
         self.register_buffer('mask', torch.zeros([1, 1, 24, 24]))
-        self.mask[0, 0, 2:-2, 2:-2] = 1  # type: ignore[index]
+        self.mask[0, 0, 2:-2, 2:-2] = 1                       
         self.num_attentions = num_attention
         self.conv_extract = nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1)
         self.bn1 = nn.BatchNorm2d(in_channels)
@@ -205,13 +205,13 @@ class AttentionMap(nn.Module):
         self.bn2 = nn.BatchNorm2d(num_attention)
 
     def forward(self, x):
-        """
-        Convert deep feature to attention map
-        Args:
-            x: extracted features
-        Returns:
-            attention_maps: conventionally 4 attention maps
-        """
+\
+\
+\
+\
+\
+\
+           
         if self.num_attentions == 0:
             return torch.ones([x.shape[0], 1, 1, 1], device=x.device)
 
@@ -231,31 +231,31 @@ class AttentionPooling(nn.Module):
         super().__init__()
 
     def forward(self, features, attentions, norm=2):
-        """
-        Bilinear Attention Pooing, when used for
-        Args:
-            features: [Tensor in [B, C_F, H_F, W_F]] extracted feature maps, either shallow ones or deep ones ???
-            attentions: [Tensor in [B, M, H, W]] attention maps, conventionally 4 attention maps (M = 4)
-            norm: [int, default=2] 1 for deep features, 2 for shallow features
-        Returns:
-            feature_matrix: [Tensor in [B, M, C_F] or [B, M, 1]] P (shallow feature) or G (deep feature) ???
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+           
         feature_size = features.size()[-2:]
         attention_size = attentions.size()[-2:]
         if feature_size != attention_size:
             attentions = F.interpolate(attentions, size=feature_size, mode='bilinear', align_corners=True)
 
         if len(features.shape) == 4:
-            # In TextureEnhanceV1, in accordance with paper
-            feature_matrix = torch.einsum('imjk,injk->imn', attentions, features)  # [B, M, C_F]
+                                                           
+            feature_matrix = torch.einsum('imjk,injk->imn', attentions, features)               
         else:
-            # In TextureEnhanceV2
+                                 
             feature_matrix = torch.einsum('imjk,imnjk->imn', attentions, features)
 
-        if norm == 1:  # Used for deep feature BAP
+        if norm == 1:                             
             w = torch.sum(attentions + 1e-8, dim=(2, 3)).unsqueeze(-1)
             feature_matrix /= w
-        elif norm == 2:  # Used for shallow feature BAP
+        elif norm == 2:                                
             feature_matrix = F.normalize(feature_matrix, p=2, dim=-1)
 
         return feature_matrix
@@ -264,7 +264,7 @@ class AttentionPooling(nn.Module):
 class TextureEnhanceV1(nn.Module):
     def __init__(self, num_features, num_attentions):
         super().__init__()
-        # self.output_features=num_features
+                                           
         self.output_features = num_features * 4
         self.output_features_d = num_features
         self.conv0 = nn.Conv2d(num_features, num_features, 1)
@@ -279,21 +279,21 @@ class TextureEnhanceV1(nn.Module):
         self.bn_last = nn.BatchNorm2d(num_features * 4)
 
     def forward(self, feature_maps, attention_maps=(1, 1)):
-        """
-        Texture Enhancement Block V1, in accordance with description in paper
-        1. Local average pooling.
-        2. Residual local features.
-        3. Dense Net
-        Args:
-            feature_maps: [Tensor in [B, C', H', W']] extracted shallow features
-            attention_maps: [Tensor in [B, M, H_A, W_A]] calculated attention maps, or
-                            [Tuple with two float elements] local average grid scale,
-                            used for conduct local average pooling, local patch size is decided by attention map size.
-        Returns:
-            feature_maps: [Tensor in [B, C_1, H_1, W_1]] enhanced feature maps
-            feature_maps_d: [Tensor in [B, C', H_A, W_A]] textural information
-
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+           
         B, N, H, W = feature_maps.shape
         if type(attention_maps) == tuple:
             attention_size = (int(H * attention_maps[0]), int(W * attention_maps[1]))
@@ -342,15 +342,15 @@ class TextureEnhanceV2(nn.Module):
         return torch.cat([a.reshape(B, self.M, -1, H, W), b.reshape(B, self.M, -1, H, W)], dim=2).reshape(B, -1, H, W)
 
     def forward(self, feature_maps, attention_maps=(1, 1)):
-        """
-        Args:
-            feature_maps: [Tensor in [B, N, H, W]] extracted feature maps from shallow layer
-            attention_maps: [Tensor in [B, M, H_A, W_A] or float of (H_ratio, W_ratio)] either extracted attention maps
-                or average pooling down-sampling ratio
-        Returns:
-            feature_maps, feature_maps_d: [Tensor in [B, M, N, H, W], Tensor in [B, N, H, W]] feature maps after dense
-                network and non-textural feature map D
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+           
         B, N, H, W = feature_maps.shape
         if type(attention_maps) == tuple:
             attention_size = (int(H * attention_maps[0]), int(W * attention_maps[1]))
@@ -362,7 +362,7 @@ class TextureEnhanceV2(nn.Module):
             feature_maps = feature_maps - F.interpolate(feature_maps_d, (feature_maps.shape[2], feature_maps.shape[3]),
                                                         mode='nearest')
         attention_maps = (
-            torch.tanh(F.interpolate(attention_maps.detach(), (H, W), mode='bilinear', align_corners=True))).unsqueeze(  # type: ignore[union-attr]
+            torch.tanh(F.interpolate(attention_maps.detach(), (H, W), mode='bilinear', align_corners=True))).unsqueeze(                            
             2) if type(attention_maps) != tuple else 1
         feature_maps = feature_maps.unsqueeze(1)
         feature_maps = (feature_maps * attention_maps).reshape(B, -1, H, W)

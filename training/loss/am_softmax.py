@@ -9,10 +9,10 @@ from .abstract_loss_func import AbstractLossClass
 from metrics.registry import LOSSFUNC
 
 
-#------------ AMSoftmax Loss ----------------------   
+                                                      
 
 def focal_loss(input_values, gamma):
-    """Computes the focal loss"""
+                                 
     p = torch.exp(-input_values)
     loss = (1 - p) ** gamma * input_values
     return loss.mean()
@@ -20,7 +20,7 @@ def focal_loss(input_values, gamma):
 
 @LOSSFUNC.register_module(module_name="am_softmax")
 class AMSoftmaxLoss(AbstractLossClass):
-    """Computes the AM-Softmax loss with cos or arc margin"""
+                                                             
     margin_types = ['cos', 'arc']
 
     def __init__(self, margin_type='cos', gamma=0., m=0.5, s=30, t=1.):
@@ -44,7 +44,7 @@ class AMSoftmaxLoss(AbstractLossClass):
             phi_theta = cos_theta - self.m
         else:
             sine = torch.sqrt(1.0 - torch.pow(cos_theta, 2))
-            phi_theta = cos_theta * self.cos_m - sine * self.sin_m #cos(theta+m)
+            phi_theta = cos_theta * self.cos_m - sine * self.sin_m              
             phi_theta = torch.where(cos_theta > self.th, phi_theta, cos_theta - self.sin_m * self.m)
 
         index = torch.zeros_like(cos_theta, dtype=torch.uint8)
@@ -56,7 +56,7 @@ class AMSoftmaxLoss(AbstractLossClass):
 
         if self.t > 1:
             h_theta = self.t - 1 + self.t*cos_theta
-            support_vecs_mask = (1 - index) * \
+            support_vecs_mask = (1 - index) *\
                 torch.lt(torch.masked_select(phi_theta, index).view(-1, 1).repeat(1, h_theta.shape[1]) - cos_theta, 0)
             output = torch.where(support_vecs_mask, h_theta, output)
             return F.cross_entropy(self.s*output, target)
@@ -66,7 +66,7 @@ class AMSoftmaxLoss(AbstractLossClass):
 
 @LOSSFUNC.register_module(module_name="am_softmax_ohem")
 class AMSoftmax_OHEM(AbstractLossClass):
-    """Computes the AM-Softmax loss with cos or arc margin"""
+                                                             
     margin_types = ['cos', 'arc']
 
     def __init__(self, margin_type='cos', gamma=0., m=0.5, s=30, t=1., ratio=1.):
@@ -87,7 +87,7 @@ class AMSoftmax_OHEM(AbstractLossClass):
         self.ratio = ratio
 
 
-    # ------- online hard example mining --------------------
+                                                             
     def get_subidx(self,x,y,ratio):                                                                                         
         num_inst = x.size(0)                                                       
         num_hns = int(ratio * num_inst)                                       
@@ -106,7 +106,7 @@ class AMSoftmax_OHEM(AbstractLossClass):
             phi_theta = cos_theta - self.m
         else:
             sine = torch.sqrt(1.0 - torch.pow(cos_theta, 2))
-            phi_theta = cos_theta * self.cos_m - sine * self.sin_m #cos(theta+m)
+            phi_theta = cos_theta * self.cos_m - sine * self.sin_m              
             phi_theta = torch.where(cos_theta > self.th, phi_theta, cos_theta - self.sin_m * self.m)
 
         index = torch.zeros_like(cos_theta, dtype=torch.uint8)
@@ -114,7 +114,7 @@ class AMSoftmax_OHEM(AbstractLossClass):
         output = torch.where(index, phi_theta, cos_theta)
 
         out = F.log_softmax(output,dim=1)
-        idxs = self.get_subidx(out,target,self.ratio) # select hard examples 
+        idxs = self.get_subidx(out,target,self.ratio)                        
 
         output2 = output.index_select(0, idxs)                                             
         target2 = target.index_select(0, idxs)        
@@ -124,7 +124,7 @@ class AMSoftmax_OHEM(AbstractLossClass):
 
         if self.t > 1:
             h_theta = self.t - 1 + self.t*cos_theta
-            support_vecs_mask = (1 - index) * \
+            support_vecs_mask = (1 - index) *\
                 torch.lt(torch.masked_select(phi_theta, index).view(-1, 1).repeat(1, h_theta.shape[1]) - cos_theta, 0)
             output2 = torch.where(support_vecs_mask, h_theta, output2)
             return F.cross_entropy(self.s*output2, target2)

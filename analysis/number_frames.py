@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
-# Set up colors for different datasets
+                                      
 colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
 
-# Read and process the AUC values
+                                 
 base_dir = 'number_frames_explore'
 models = ['xception', 'spsl', 'facexray']
 datasets = ['FaceForensics++', 'FaceForensics++_c40', 'DFDCP', 'Celeb-DF-v2', 'DeepFakeDetection']
@@ -37,16 +37,16 @@ for ax, dataset, color in zip(axs, datasets, colors):
                     df = pd.read_csv(os.path.join(frame_path, csv_file))
                     auc_values.append(df['Value'].mean())
 
-        # Sort frame numbers and corresponding AUC values
+                                                         
         sorted_values = [x for _, x in sorted(zip(frame_numbers, auc_values))]
         sorted_frame_numbers = sorted(frame_numbers)
 
         ax.plot(sorted_frame_numbers, sorted_values, label=model, color=color, linestyle=linestyle, linewidth=2.0)
 
-    # Add legend and grid
+                         
     ax.legend(loc='center right', fontsize=14)
     ax.grid(True, linestyle='--')
 
-# plt.suptitle('Effect of Number of Training Frames on AUC Performance', fontsize=16, fontweight='bold')
+                                                                                                        
 plt.tight_layout()
 plt.savefig('line_chart_number_frames_2.png')

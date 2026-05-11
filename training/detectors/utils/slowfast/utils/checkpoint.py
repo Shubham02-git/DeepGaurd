@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+                      
+                                                                       
 
-"""Functions that handle saving and loading of checkpoints."""
+                                                              
 
 import copy
 import numpy as np
@@ -19,13 +19,13 @@ logger = logging.get_logger(__name__)
 
 
 def make_checkpoint_dir(path_to_job):
-    """
-    Creates the checkpoint directory (if not present already).
-    Args:
-        path_to_job (string): the path to the folder of the current job.
-    """
+\
+\
+\
+\
+       
     checkpoint_dir = os.path.join(path_to_job, "checkpoints")
-    # Create the checkpoint dir from the master process
+                                                       
     if du.is_master_proc() and not PathManager.exists(checkpoint_dir):
         try:
             PathManager.mkdirs(checkpoint_dir)
@@ -35,60 +35,60 @@ def make_checkpoint_dir(path_to_job):
 
 
 def get_checkpoint_dir(path_to_job):
-    """
-    Get path for storing checkpoints.
-    Args:
-        path_to_job (string): the path to the folder of the current job.
-    """
+\
+\
+\
+\
+       
     return os.path.join(path_to_job, "checkpoints")
 
 
 def get_path_to_checkpoint(path_to_job, epoch):
-    """
-    Get the full path to a checkpoint file.
-    Args:
-        path_to_job (string): the path to the folder of the current job.
-        epoch (int): the number of epoch for the checkpoint.
-    """
+\
+\
+\
+\
+\
+       
     name = "checkpoint_epoch_{:07d}.pyth".format(epoch)
     return os.path.join(get_checkpoint_dir(path_to_job), name)
 
 
 def get_last_checkpoint(path_to_job):
-    """
-    Get the last checkpoint from the checkpointing folder.
-    Args:
-        path_to_job (string): the path to the folder of the current job.
-    """
+\
+\
+\
+\
+       
 
     d = get_checkpoint_dir(path_to_job)
     names = PathManager.ls(d) if PathManager.exists(d) else []
     names = [f for f in names if "checkpoint" in f]
     assert len(names), "No checkpoints found in '{}'.".format(d)
-    # Sort the checkpoints by epoch.
+                                    
     name = sorted(names)[-1]
     return os.path.join(d, name)
 
 
 def has_checkpoint(path_to_job):
-    """
-    Determines if the given directory contains a checkpoint.
-    Args:
-        path_to_job (string): the path to the folder of the current job.
-    """
+\
+\
+\
+\
+       
     d = get_checkpoint_dir(path_to_job)
     files = PathManager.ls(d) if PathManager.exists(d) else []
     return any("checkpoint" in f for f in files)
 
 
 def is_checkpoint_epoch(cfg, cur_epoch, multigrid_schedule=None):
-    """
-    Determine if a checkpoint should be saved on current epoch.
-    Args:
-        cfg (CfgNode): configs to save.
-        cur_epoch (int): current number of epoch of the model.
-        multigrid_schedule (List): schedule for multigrid training.
-    """
+\
+\
+\
+\
+\
+\
+       
     if cur_epoch + 1 == cfg.SOLVER.MAX_EPOCH:
         return True
     if multigrid_schedule is not None:
@@ -105,37 +105,37 @@ def is_checkpoint_epoch(cfg, cur_epoch, multigrid_schedule=None):
 
 
 def is_checkpoint_iter(cfg, cur_iter):
-    """
-    Determine if a checkpoint should be saved on current iter.
-    Args:
-        cfg (CfgNode): configs to save.
-        cur_epoch (int): current number of epoch of the model.
-        multigrid_schedule (List): schedule for multigrid training.
-    """
+\
+\
+\
+\
+\
+\
+       
 
     return (cur_iter+1) % cfg.TRAIN.CHECKPOINT_PERIOD_BY_ITER == 0
 
 
 
 def save_checkpoint_by_iter(path_to_job, model, optimizer, epoch,global_step,cfg):
-    """
-    Save a checkpoint.
-    Args:
-        model (model): model to save the weight to the checkpoint.
-        optimizer (optim): optimizer to save the historical state.
-        epoch (int): current number of epoch of the model.
-        cfg (CfgNode): configs to save.
-    """
-    # Save checkpoints only from the master process.
+\
+\
+\
+\
+\
+\
+\
+       
+                                                    
     if not du.is_master_proc(cfg.NUM_GPUS * cfg.NUM_SHARDS):
         return
-    # Ensure that the checkpoint dir exists.
+                                            
     PathManager.mkdirs(get_checkpoint_dir(path_to_job))
-    # Omit the DDP wrapper in the multi-gpu setting.
+                                                    
     sd = model.module.state_dict() if cfg.NUM_GPUS > 1 else model.state_dict()
     normalized_sd = sub_to_normal_bn(sd)
 
-    # Record the state.
+                       
     checkpoint = {
         "epoch": epoch,
         "model_state": normalized_sd,
@@ -143,38 +143,38 @@ def save_checkpoint_by_iter(path_to_job, model, optimizer, epoch,global_step,cfg
         "global_step": global_step,
         "cfg": cfg.dump(),
     }
-    # Write the checkpoint.
+                           
     path_to_checkpoint = get_path_to_checkpoint(path_to_job,global_step+1)
     with PathManager.open(path_to_checkpoint, "wb") as f:
         torch.save(checkpoint, f)
     return path_to_checkpoint
 
 def save_checkpoint(path_to_job, model, optimizer, epoch, cfg):
-    """
-    Save a checkpoint.
-    Args:
-        model (model): model to save the weight to the checkpoint.
-        optimizer (optim): optimizer to save the historical state.
-        epoch (int): current number of epoch of the model.
-        cfg (CfgNode): configs to save.
-    """
-    # Save checkpoints only from the master process.
+\
+\
+\
+\
+\
+\
+\
+       
+                                                    
     if not du.is_master_proc(cfg.NUM_GPUS * cfg.NUM_SHARDS):
         return
-    # Ensure that the checkpoint dir exists.
+                                            
     PathManager.mkdirs(get_checkpoint_dir(path_to_job))
-    # Omit the DDP wrapper in the multi-gpu setting.
+                                                    
     sd = model.module.state_dict() if cfg.NUM_GPUS > 1 else model.state_dict()
     normalized_sd = sub_to_normal_bn(sd)
 
-    # Record the state.
+                       
     checkpoint = {
         "epoch": epoch,
         "model_state": normalized_sd,
         "optimizer_state": optimizer.state_dict(),
         "cfg": cfg.dump(),
     }
-    # Write the checkpoint.
+                           
     path_to_checkpoint = get_path_to_checkpoint(path_to_job, epoch + 1)
     with PathManager.open(path_to_checkpoint, "wb") as f:
         torch.save(checkpoint, f)
@@ -182,27 +182,27 @@ def save_checkpoint(path_to_job, model, optimizer, epoch, cfg):
 
 
 def inflate_weight(state_dict_2d, state_dict_3d):
-    """
-    Inflate 2D model weights in state_dict_2d to the 3D model weights in
-    state_dict_3d. The details can be found in:
-    Joao Carreira, and Andrew Zisserman.
-    "Quo vadis, action recognition? a new model and the kinetics dataset."
-    Args:
-        state_dict_2d (OrderedDict): a dict of parameters from a 2D model.
-        state_dict_3d (OrderedDict): a dict of parameters from a 3D model.
-    Returns:
-        state_dict_inflated (OrderedDict): a dict of inflated parameters.
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
     state_dict_inflated = OrderedDict()
     for k, v2d in state_dict_2d.items():
         assert k in state_dict_3d.keys()
         v3d = state_dict_3d[k]
-        # Inflate the weight of 2D conv to 3D conv.
+                                                   
         if len(v2d.shape) == 4 and len(v3d.shape) == 5:
             logger.info(
                 "Inflate {}: {} -> {}: {}".format(k, v2d.shape, k, v3d.shape)
             )
-            # Dimension need to be match.
+                                         
             assert v2d.shape[-2:] == v3d.shape[-2:]
             assert v2d.shape[:2] == v3d.shape[:2]
             v3d = (
@@ -228,25 +228,25 @@ def load_checkpoint(
     inflation=False,
     convert_from_caffe2=False,
 ):
-    """
-    Load the checkpoint from the given file. If inflation is True, inflate the
-    2D Conv weights from the checkpoint to 3D Conv.
-    Args:
-        path_to_checkpoint (string): path to the checkpoint to load.
-        model (model): model to load the weights from the checkpoint.
-        data_parallel (bool): if true, model is wrapped by
-        torch.nn.parallel.DistributedDataParallel.
-        optimizer (optim): optimizer to load the historical state.
-        inflation (bool): if True, inflate the weights from the checkpoint.
-        convert_from_caffe2 (bool): if True, load the model from caffe2 and
-            convert it to pytorch.
-    Returns:
-        (int): the number of training epoch of the checkpoint.
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
     assert PathManager.exists(
         path_to_checkpoint
     ), "Checkpoint '{}' not found".format(path_to_checkpoint)
-    # Account for the DDP wrapper in the multi-gpu setting.
+                                                           
     ms = model.module if data_parallel else model
     if convert_from_caffe2:
         with PathManager.open(path_to_checkpoint, "rb") as f:
@@ -259,7 +259,7 @@ def load_checkpoint(
             if converted_key in ms.state_dict():
                 c2_blob_shape = caffe2_checkpoint["blobs"][key].shape
                 model_blob_shape = ms.state_dict()[converted_key].shape
-                # Load BN stats to Sub-BN.
+                                          
                 if (
                     len(model_blob_shape) == 1
                     and len(c2_blob_shape) == 1
@@ -306,7 +306,7 @@ def load_checkpoint(
         epoch = -1
         global_step=-1 
     else:
-        # Load the checkpoint on CPU to avoid GPU mem spike.
+                                                            
         with PathManager.open(path_to_checkpoint, "rb") as f:
             checkpoint = torch.load(f, map_location="cpu")
         model_state_dict_3d = (
@@ -316,14 +316,14 @@ def load_checkpoint(
             checkpoint["model_state"], model_state_dict_3d
         )
         if inflation:
-            # Try to inflate the model.
+                                       
             inflated_model_dict = inflate_weight(
                 checkpoint["model_state"], model_state_dict_3d
             )
             ms.load_state_dict(inflated_model_dict, strict=False)
         else:
             ms.load_state_dict(checkpoint["model_state"])
-            # Load the optimizer state (commonly not done when fine-tuning)
+                                                                           
             if optimizer:
                 optimizer.load_state_dict(checkpoint["optimizer_state"])
         if "epoch" in checkpoint.keys():
@@ -338,20 +338,20 @@ def load_checkpoint(
 
 
 def sub_to_normal_bn(sd):
-    """
-    Convert the Sub-BN paprameters to normal BN parameters in a state dict.
-    There are two copies of BN layers in a Sub-BN implementation: `bn.bn` and
-    `bn.split_bn`. `bn.split_bn` is used during training and
-    "compute_precise_bn". Before saving or evaluation, its stats are copied to
-    `bn.bn`. We rename `bn.bn` to `bn` and store it to be consistent with normal
-    BN layers.
-    Args:
-        sd (OrderedDict): a dict of parameters whitch might contain Sub-BN
-        parameters.
-    Returns:
-        new_sd (OrderedDict): a dict with Sub-BN parameters reshaped to
-        normal parameters.
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
     new_sd = copy.deepcopy(sd)
     modifications = [
         ("bn.bn.running_mean", "bn.running_mean"),
@@ -379,14 +379,14 @@ def sub_to_normal_bn(sd):
 
 
 def c2_normal_to_sub_bn(key, model_keys):
-    """
-    Convert BN parameters to Sub-BN parameters if model contains Sub-BNs.
-    Args:
-        key (OrderedDict): source dict of parameters.
-        mdoel_key (OrderedDict): target dict of parameters.
-    Returns:
-        new_sd (OrderedDict): converted dict of parameters.
-    """
+\
+\
+\
+\
+\
+\
+\
+       
     if "bn.running_" in key:
         if key in model_keys:
             return key
@@ -399,14 +399,14 @@ def c2_normal_to_sub_bn(key, model_keys):
 
 
 def normal_to_sub_bn(checkpoint_sd, model_sd):
-    """
-    Convert BN parameters to Sub-BN parameters if model contains Sub-BNs.
-    Args:
-        checkpoint_sd (OrderedDict): source dict of parameters.
-        model_sd (OrderedDict): target dict of parameters.
-    Returns:
-        new_sd (OrderedDict): converted dict of parameters.
-    """
+\
+\
+\
+\
+\
+\
+\
+       
     for key in model_sd:
         if key not in checkpoint_sd:
             if "bn.split_bn." in key:
@@ -440,14 +440,14 @@ def normal_to_sub_bn(checkpoint_sd, model_sd):
 
 
 def load_test_checkpoint(cfg, model):
-    """
-    Loading checkpoint logic for testing.
-    """
-    # Load a checkpoint to test if applicable.
+\
+\
+       
+                                              
     if cfg.TEST.CHECKPOINT_FILE_PATH != "":
-        # If no checkpoint found in MODEL_VIS.CHECKPOINT_FILE_PATH or in the current
-        # checkpoint folder, try to load checkpoint from
-        # TEST.CHECKPOINT_FILE_PATH and test it.
+                                                                                    
+                                                        
+                                                
         load_checkpoint(
             cfg.TEST.CHECKPOINT_FILE_PATH,
             model,
@@ -460,9 +460,9 @@ def load_test_checkpoint(cfg, model):
         last_checkpoint = get_last_checkpoint(cfg.OUTPUT_DIR)
         load_checkpoint(last_checkpoint, model, cfg.NUM_GPUS > 1)
     elif cfg.TRAIN.CHECKPOINT_FILE_PATH != "":
-        # If no checkpoint found in TEST.CHECKPOINT_FILE_PATH or in the current
-        # checkpoint folder, try to load checkpoint from
-        # TRAIN.CHECKPOINT_FILE_PATH and test it.
+                                                                               
+                                                        
+                                                 
         load_checkpoint(
             cfg.TRAIN.CHECKPOINT_FILE_PATH,
             model,
@@ -478,9 +478,9 @@ def load_test_checkpoint(cfg, model):
 
 
 def load_train_checkpoint(cfg, model, optimizer):
-    """
-    Loading checkpoint logic for training.
-    """
+\
+\
+       
     if cfg.TRAIN.AUTO_RESUME and has_checkpoint(cfg.OUTPUT_DIR):
         last_checkpoint = get_last_checkpoint(cfg.OUTPUT_DIR)
         logger.info("Load from last checkpoint, {}.".format(last_checkpoint))

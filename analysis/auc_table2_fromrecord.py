@@ -23,7 +23,7 @@ results = []
 
 for detector in detectors:
     for train_data in glob.glob(f'{detector}/*'):
-        train_data_name = os.path.basename(train_data)  # Assuming train_data is the directory name
+        train_data_name = os.path.basename(train_data)                                             
         csv_files = glob.glob(f'{train_data}/*.csv')
         for csv_file in csv_files:
             df = pd.read_csv(csv_file)

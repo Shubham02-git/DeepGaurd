@@ -37,15 +37,15 @@ def create_facial_mask(mask, with_neck=False):
 
 
 def face_parsing_mask(img1, with_neck=False):
-    # run inference on image
+                            
     img1 = Image.fromarray(img1)
     inputs = image_processor(images=img1, return_tensors="pt").to(device)
     outputs = face_parser(**inputs)
-    logits = outputs.logits  # shape (batch_size, num_labels, ~height/4, ~width/4)
+    logits = outputs.logits                                                       
 
-    # resize output to match input image dimensions
+                                                   
     upsampled_logits = nn.functional.interpolate(logits,
-                    size=img1.size[::-1], # H x W
+                    size=img1.size[::-1],        
                     mode='bilinear',
                     align_corners=False)
     labels = upsampled_logits.argmax(dim=1)[0]
@@ -58,31 +58,31 @@ class YZYDataset(DeepfakeAbstractBaseDataset):
     def __init__(self, config=None, mode='train'):
         super().__init__(config, mode)
         
-        # Get real lists
-        # Fix the label of real images to be 0
+                        
+                                              
         self.real_imglist = [(img, label) for img, label in zip(self.image_list, self.label_list) if label == 0]
 
 
     def __getitem__(self, index):
-        # Get the real image paths and labels
+                                             
         real_image_path, real_label = self.real_imglist[index]
-        # real_image_path = real_image_path.replace('/Youtu_Pangu_Security_Public/', '/Youtu_Pangu_Security/public/')
+                                                                                                                     
 
-        # Load the real images
+                              
         real_image = self.load_rgb(real_image_path)
-        real_image = np.array(real_image)  # Convert to numpy array
+        real_image = np.array(real_image)                          
 
-        # Face Parsing 
+                       
         mask = face_parsing_mask(real_image, with_neck=False)
         parse_mask_path = real_image_path.replace('frames', 'parse_mask')
         os.makedirs(os.path.dirname(parse_mask_path), exist_ok=True)
         cv2.imwrite(parse_mask_path, mask)
 
-        # # SRI generation
-        # sri_image = self_blend(real_image)
-        # sri_path = real_image_path.replace('frames', 'sri_frames')
-        # os.makedirs(os.path.dirname(sri_path), exist_ok=True)
-        # cv2.imwrite(sri_path, sri_image)
+                          
+                                            
+                                                                    
+                                                               
+                                          
         
     @staticmethod
     def collate_fn(batch):
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     config['dataset_json_folder'] = '/Youtu_Pangu_Security_Public/youtu-pangu-public/zhiyuanyan/DeepfakeBenchv2/preprocessing/dataset_json'
     config.update(config2)
     train_set = YZYDataset(config=config, mode='train')
-    train_data_loader = \
+    train_data_loader =\
         torch.utils.data.DataLoader(
             dataset=train_set,
             batch_size=config['train_batchSize'],

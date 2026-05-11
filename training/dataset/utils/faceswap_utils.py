@@ -2,11 +2,11 @@ import numpy as np
 import cv2
 
 def AlphaBlend(foreground, background, alpha):
-    # Convert uint8 to float
+                            
     foreground = foreground.astype(float)
     background = background.astype(float)
 
-    # Normalize the alpha mask to keep intensity between 0 and 1
+                                                                
     alpha = alpha.astype(float)/255
     if len(alpha.shape) < 3:
         alpha = np.expand_dims(alpha, 2)
@@ -23,7 +23,7 @@ def blendImages(src, dst, mask, featherAmount=0.1):
     featherAmount = 0.2
 
     hull = cv2.convexHull(maskPts)
-    #hull = hull.astype(np.uint64)
+                                  
     dists = np.zeros(maskPts.shape[0])
     for i in range(maskPts.shape[0]):
         point = (maskPts[i, 0], maskPts[i, 1])
@@ -36,9 +36,9 @@ def blendImages(src, dst, mask, featherAmount=0.1):
 
     weights = np.clip(dists / featherAmount, 0, 1)
     composedImg = np.copy(dst)
-    composedImg[maskIndices[0], maskIndices[1]] = weights[:, np.newaxis] * \
-                                                  src[maskIndices[0], maskIndices[1]] + \
-                                                  (1 - weights[:, np.newaxis]) * \
+    composedImg[maskIndices[0], maskIndices[1]] = weights[:, np.newaxis] *\
+                                                  src[maskIndices[0], maskIndices[1]] +\
+                                                  (1 - weights[:, np.newaxis]) *\
                                                   dst[maskIndices[0], maskIndices[1]]
     newMask = np.zeros_like(dst).astype(np.float32)
     newMask[maskIndices[0], maskIndices[1]] = weights[:, np.newaxis]

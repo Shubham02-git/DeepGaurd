@@ -36,7 +36,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 class LSDADetector(AbstractDetector):
     def __init__(self, config):
         super().__init__()
-        # model
+               
         forgery_num = 4
         self.model = generator(
             num_classes=forgery_num+1, encoder_feat_dim=512, 
@@ -44,37 +44,37 @@ class LSDADetector(AbstractDetector):
             real_encoder=config['real_encoder'],
         ).to(device)
 
-        # loss
+              
         self.cls_criterion = nn.CrossEntropyLoss()
         self.gan_loss_fn = nn.BCELoss()
         self.prob, self.label = [], []
         self.correct, self.total = 0, 0
 
     def build_backbone(self, config):
-        pass  # FIXME: will be added into this function
+        pass                                           
 
     def build_loss(self, config):
-        pass  # FIXME: will be added into this function
+        pass                                           
 
     def features(self, data_dict: dict) -> torch.tensor:
-        pass  # FIXME: will be added into this function
+        pass                                           
 
     def classifier(self, features: torch.tensor) -> torch.tensor:
-        pass  # FIXME: will be added into this function
+        pass                                           
 
     def get_losses(self, data_dict: dict, predictions: dict) -> dict:
         try:
             deepfake_loss, total_loss_distillation, domain_loss, loss_real = predictions['pred_loss']
 
-            loss = \
-                1  * domain_loss + \
-                0.5  * deepfake_loss + \
-                1  * total_loss_distillation + \
+            loss =\
+                1  * domain_loss +\
+                0.5  * deepfake_loss +\
+                1  * total_loss_distillation +\
                 1  * loss_real
             loss_dict = {'overall': loss, 'domain': domain_loss, 'deepfake': deepfake_loss, 'distillation': total_loss_distillation, 'real_loss': loss_real}
         
         except:
-            # test time
+                       
             loss = 0
             loss_dict = {'overall': loss}
         return loss_dict
@@ -83,15 +83,15 @@ class LSDADetector(AbstractDetector):
         label = data_dict['label']
         label = torch.where(label == 0, 0, 1).reshape(-1,1)
         prob = pred_dict['prob'].reshape(-1,1)
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), prob.detach())
         metric_batch_dict = {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
         return metric_batch_dict
 
     def forward(self, data_dict: dict, inference=False) -> dict:
         
-        # 1. Forward pass
-        # pred, data_dict['label'], feat = 
+                         
+                                           
         model_output = self.model(data_dict['image'], data_dict['label'], inference=inference)
         if inference:
             pred = model_output
@@ -118,7 +118,7 @@ class LSDADetector(AbstractDetector):
                 .cpu()
                 .numpy()
             )
-            # deal with acc
+                           
             _, prediction_class = torch.max(pred, 1)
             correct = (prediction_class == data_dict['label']).sum().item()
             self.correct += correct
@@ -145,7 +145,7 @@ class efficientnet(nn.Module):
         else:
             raise ValueError('pretrain is not supported')
 
-        # self.channel_adjust_conv = nn.Conv2d(2424, 512, 1)
+                                                            
     
     def features(self, x):
         x = self.model.extract_features(x)
@@ -220,18 +220,18 @@ class generator(nn.Module):
 
         super(generator, self).__init__()
         self.num_domains = num_domains
-        # init variable
+                       
         self.num_classes = num_classes
         self.encoder_feat_dim = encoder_feat_dim
         self.half_fingerprint_dim = encoder_feat_dim//2
         
-        # basic function
+                        
         self.lr = nn.LeakyReLU(inplace=True)
         self.do = nn.Dropout(0.2)
         self.pool = nn.AdaptiveAvgPool2d(1)
         self.count = 0
 
-        # 4个fake，用modulelist
+                            
         if teacher == 'xception':
             self.encoders_f = nn.ModuleList([self.init_xcep() for _ in range(self.num_domains-1)])
         elif teacher == 'efficientnetb4':
@@ -278,7 +278,7 @@ class generator(nn.Module):
 
     def init_xcep(self, pretrained_path='pretrained/xception-b5690688.pth'):
         xcep = Xception(self.num_classes)
-        # load pre-trained Xception
+                                   
         state_dict = torch.load(pretrained_path)
         for name, weights in state_dict.items():
             if 'pointwise' in name:
@@ -291,13 +291,13 @@ class generator(nn.Module):
         model = efficientnet(pretrain='efficientnet-b4')
         return model
 
-    # only for grad cam
+                       
     def features(self, cat_data):
-        # Binary classification detector, a student model, to be distilled (real/fake)
+                                                                                      
         student_feature = self.student_encoder.features(cat_data)
         return student_feature
 
-    # only for grad cam
+                       
     def classifier(self, fea):
         out = self.binary_classifier(fea)
         return out, None
@@ -305,23 +305,23 @@ class generator(nn.Module):
     def real_fake_feature_extract(self, cat_data):
         number_of_groups, video_per_group, c, h, w = cat_data.shape
 
-        # Use defaultdict to store tensors for each domain
+                                                          
         domain_f_chunks = defaultdict(list)
         domain_c_chunks = defaultdict(list)
 
         for domain_id in range(video_per_group):
-            # Get the data for the current domain across all groups
+                                                                   
             domain_data_tensor = cat_data[:, domain_id]
             
-            # Compute self-generation loss
+                                          
             c_chunk = self.encoder_c(domain_data_tensor)
-            if domain_id>0: # 是哪个domain的。就用哪个encoder. 5 in total
+            if domain_id>0:                                     
                 f_chunk = self.encoders_f[domain_id-1].features(domain_data_tensor)
-                # Store the chunks in the defaultdict
+                                                     
                 domain_f_chunks[domain_id-1] = f_chunk
             domain_c_chunks[domain_id] = c_chunk
 
-        # Reconstruct the tensors based on the label order
+                                                          
         all_f_outputs = torch.stack(list(domain_f_chunks.values())).transpose(1, 0)
         all_c_outputs = torch.stack(list(domain_c_chunks.values())).transpose(1, 0)
 
@@ -329,7 +329,7 @@ class generator(nn.Module):
 
 
     def augment_domains(self, groups_feature_maps):
-        # Helper Functions
+                          
         def hard_example_interpolation(z_i, hard_example, lambda_1):
             return z_i + lambda_1 * (hard_example - z_i)
 
@@ -349,14 +349,14 @@ class generator(nn.Module):
 
         domain_number = len(groups_feature_maps[0])
 
-        # Calculate the mean latent vector for each domain across all groups; why 8*8
+                                                                                     
         domain_means = []
         for domain_idx in range(domain_number):
             all_samples_in_domain = torch.cat([group[domain_idx] for group in groups_feature_maps], dim=0)
             domain_mean = torch.mean(all_samples_in_domain, dim=0)
             domain_means.append(domain_mean)
 
-        # Identify the hard example for each domain across all groups (the farest one)
+                                                                                      
         hard_examples = []
         for domain_idx in range(domain_number):
             all_samples_in_domain = torch.cat([group[domain_idx] for group in groups_feature_maps], dim=0)
@@ -366,12 +366,12 @@ class generator(nn.Module):
 
 
         augmented_groups = []
-        # modify each feature maps
+                                  
         for group_feature_maps in groups_feature_maps:
             augmented_domains = []
 
             for domain_idx, domain_feature_maps in enumerate(group_feature_maps):
-                # Choose a random augmentation
+                                              
                 augmentations = [
                     lambda z: hard_example_interpolation(z, hard_examples[domain_idx], random.random()),
                     lambda z: hard_example_extrapolation(z, domain_means[domain_idx], random.random()),
@@ -389,22 +389,22 @@ class generator(nn.Module):
 
 
     def mixup_in_latent_space(self, data):
-        # data shape: [batchsize, num_domains, 3, 256, 256]
+                                                           
         bs, num_domains, _, _, _ = data.shape
 
-        # Initialize an empty tensor for mixed data
+                                                   
         mixed_data = torch.zeros_like(data)
 
-        # For each sample in the batch
+                                      
         for i in range(bs):
-            # Step 1: Generate a shuffled index list for the domains
+                                                                    
             shuffled_idxs = torch.randperm(num_domains)
 
-            # Step 2: Choose random alpha between 0.5 and 2, then sample lambda from beta distribution
-            alpha = torch.rand(1) * 1.5 + 0.5  # random alpha between 0.5 and 2
+                                                                                                      
+            alpha = torch.rand(1) * 1.5 + 0.5                                  
             lambda_ = torch.distributions.beta.Beta(alpha, alpha).sample().to(data.device)
 
-            # Step 3: Perform mixup using the shuffled indices
+                                                              
             mixed_data[i] = lambda_ * data[i] + (1 - lambda_) * data[i, shuffled_idxs]
 
         return mixed_data
@@ -413,19 +413,19 @@ class generator(nn.Module):
     def rotate_trans(self, fake_fs, 
                     rotation_degree_range=(-30, 30)):
     
-        # Convert degrees to radians
+                                    
         rotation_degree = torch.rand(1).to(fake_fs.device) * (rotation_degree_range[1] - rotation_degree_range[0]) + rotation_degree_range[0]
         rotation_radians = rotation_degree * (3.141592653589793 / 180.0)
-        # Create an identity affine transformation (3x4) with the rotation in the top-left 2x2 corner
+                                                                                                     
         identity_affine = torch.tensor([
             [1.0, 0.0, 0.0, 0.0],
             [0.0, 1.0, 0.0, 0.0],
             [0.0, 0.0, 1.0, 0.0]
         ], dtype=torch.float32).to(fake_fs.device)
-        # Fill the rotation into the top-left 2x2
+                                                 
         identity_affine[0, 0:2] = torch.tensor([torch.cos(rotation_radians), -torch.sin(rotation_radians)], dtype=torch.float32).to(fake_fs.device)
         identity_affine[1, 0:2] = torch.tensor([torch.sin(rotation_radians), torch.cos(rotation_radians)], dtype=torch.float32).to(fake_fs.device)
-        # Expand the affine transformation for the batch
+                                                        
         theta = identity_affine.unsqueeze(0).repeat(fake_fs.size(0), 1, 1)
         grid = F.affine_grid(theta, fake_fs.size())
         fake_fs = F.grid_sample(fake_fs, grid)
@@ -443,85 +443,85 @@ class generator(nn.Module):
 
     @staticmethod
     def js_loss(inputs, targets):
-        """
-        Computes the Jensen-Shannon divergence loss.
-        """
-        # Compute the probability distributions
+\
+\
+           
+                                               
         inputs_prob = F.softmax(inputs, dim=1)
         targets_prob = F.softmax(targets, dim=1)
 
-        # Compute the average probability distribution
+                                                      
         avg_prob = (inputs_prob + targets_prob) / 2
 
-        # Compute the KL divergence component for each distribution
+                                                                   
         kl_div_loss = nn.KLDivLoss(reduction='batchmean')
         kl_inputs = kl_div_loss(inputs_prob.log(), avg_prob)
         kl_targets = kl_div_loss(targets_prob.log(), avg_prob)
 
-        # Compute the Jensen-Shannon divergence
+                                               
         loss = 0.5 * (kl_inputs + kl_targets)
         return loss
 
 
     def forward(self, cat_data, label=None, inference=False):
         if inference:
-            # Use the common encoder for inference/testing
+                                                          
             student_feature = self.student_encoder.features(cat_data) 
             out_common = self.binary_classifier(student_feature)
             return out_common
 
-        # Obtain data
+                     
         number_of_groups, video_per_group, c, h, w = cat_data.shape
 
-        # Extract the real and fake features separately ; 每一个都是一个单独的effnb4提取出来的
+                                                                               
         f_outputs, c_outputs = self.real_fake_feature_extract(cat_data)
 
-        # p = random.random()
-        # if p > 0.5:
-        #     f_outputs = self.rotate_trans(f_outputs)
+                             
+                     
+                                                      
 
 
 
-        # Perform augmentation in the latent space / f_out 只包含 fake
+                                                                   
         f_outputs_aug = self.augment_domains(f_outputs)
-        # Mixup in the latent space for cross-domain
+                                                    
         mix_f_outputs = self.mixup_in_latent_space(f_outputs)
         aug_fake = torch.cat([f_outputs_aug, mix_f_outputs], dim=2).view(-1, self.encoder_feat_dim*2, 8, 8)
         fc = self.fc_weights(aug_fake).view(number_of_groups, video_per_group-1, self.encoder_feat_dim, 8, 8)
 
 
 
-        # real constrain (optional, for the aim of learning real-features (e.g., ID) better)
+                                                                                            
         real = c_outputs[:, 0, :, :, :]
         df = c_outputs[:, 1, :, :, :]
         f2f = c_outputs[:, 2, :, :, :]
         fs = c_outputs[:, 3, :, :, :]
         nt = c_outputs[:, 4, :, :, :]
-        loss_real = self.cosine_similarity_loss(real, nt).sum() \
-          + self.cosine_similarity_loss(real, f2f).sum() \
-          - self.cosine_similarity_loss(real, fs).sum() \
+        loss_real = self.cosine_similarity_loss(real, nt).sum()\
+          + self.cosine_similarity_loss(real, f2f).sum()\
+          - self.cosine_similarity_loss(real, fs).sum()\
           - self.cosine_similarity_loss(real, df).sum()
-        # loss_real = self.js_loss(real, nt) + self.js_loss(real, f2f) - self.js_loss(real, fs) - self.js_loss(real, df)
+                                                                                                                        
         loss_real = loss_real.mean()
                     
 
 
 
-        # Obtain reshape label
+                              
         label = label.contiguous().view(-1)
-        # Obtain the binary label
+                                 
         binary_label = torch.where(label==0, 0, 1)
 
 
 
 
-        # Binary classification detector, a student model, to be distilled (real/fake)
+                                                                                      
         student_feature = self.student_encoder.features(cat_data.view(-1, c, h, w))
         binary_out = self.binary_classifier(student_feature)
         deepfake_loss = F.cross_entropy(binary_out, binary_label)
 
 
-        # Distillation for the student encoder
+                                              
         real_mask = (label == 0)
         fake_mask = (label > 0)
         distillation_real_feature = student_feature[real_mask]
@@ -533,7 +533,7 @@ class generator(nn.Module):
 
 
 
-        # Domain classification loss for all domains
+                                                    
         all_domain_feat = torch.cat([c_outputs[:, 0, :, :, :].unsqueeze(1), f_outputs], dim=1).reshape((number_of_groups*video_per_group, self.encoder_feat_dim, 8, 8))
         out_spe = self.mlp(all_domain_feat)
         domain_loss = self.cls_criterion(out_spe, label)

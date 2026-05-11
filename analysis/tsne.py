@@ -56,13 +56,13 @@ for i, tsne_dict in enumerate(detector_name_list):
     feat_transformed = tsne.fit_transform(feat)
     scatter = tsne_draw(feat_transformed, label_spe, ax=axs[i], epoch=0, log='share_in_specific', detector_name='xception')
 
-    # # give a title to the subplot
-    # axs[i].set_title(f'Xception with {name} frames')  
+                                   
+                                                        
 
-# create a legend for the whole figure after the loop
+                                                     
 handles = [plt.Line2D([0], [0], marker='*', color='w', markerfacecolor=color_map[i], markersize=10) if i == 0 else plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color_map[i], markersize=10) for i in range(5)]
 labels = [label_dict[i] for i in range(5)]
-# fig.legend(handles, labels, title="Classes", loc="upper right", fontsize=14)
+                                                                              
 
 plt.tight_layout()
 plt.savefig('xcep_4vs270_3.png')

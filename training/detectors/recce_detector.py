@@ -36,19 +36,19 @@ class RecceDetector(AbstractDetector):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        self.backbone = self.build_backbone(config) # FIXME: do not use the self.backbone in recce
+        self.backbone = self.build_backbone(config)                                               
         self.loss_func = self.build_loss(config)
         self.model = Recce(num_classes=2)
 
-    # FIXME: the above function should be comment or something else
+                                                                   
     def build_backbone(self, config):
-        # prepare the backbone
+                              
         backbone_class = BACKBONE[config['backbone_name']]
         model_config = config['backbone_config']
         return backbone_class(model_config)
     
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         return loss_class()
     
@@ -67,24 +67,24 @@ class RecceDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         return {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
 
     def forward(self, data_dict: dict, inference=False) -> dict:
-        # get the features by backbone
+                                      
         features = self.features(data_dict)
-        # get the prediction by classifier
+                                          
         pred = self.classifier(features)
 
-        # get the probability of the pred
+                                         
         prob = torch.softmax(pred, dim=1)[:, 1]
-        # build the prediction dict for each output
+                                                   
         return {'cls': pred, 'prob': prob, 'feat': features}
 
 
 class Recce(nn.Module):
-    """ End-to-End Reconstruction-Classification Learning for Face Forgery Detection """
+                                                                                        
 
     def __init__(self, num_classes, drop_rate=0.2):
         super(Recce, self).__init__()
@@ -138,7 +138,7 @@ class Recce(nn.Module):
         return noise_t
 
     def features(self, x):
-                # clear the loss inputs
+                                       
         self.loss_inputs = dict(recons=[], contra=[])
         noise_x = self.add_white_noise(x) if self.training else x
         out = self.encoder.conv1(noise_x)
@@ -208,7 +208,7 @@ class Recce(nn.Module):
         return self.classifier(embedding)
 
 class GraphReasoning(nn.Module):
-    """ Graph Reasoning Module for information aggregation. """
+                                                               
 
     def __init__(self, va_in, va_out, vb_in, vb_out, vc_in, vc_out, spatial_ratio, drop_rate):
         super(GraphReasoning, self).__init__()
@@ -277,14 +277,14 @@ class GraphReasoning(nn.Module):
         agg_vb = []
         agg_vc = []
         for j in range(emb_vert_a.shape[-1]):
-            # ab propagating
+                            
             emb_v_a = torch.stack([emb_vert_a[:, :, j]] * (self.ratio[0] ** 2), dim=1)
             emb_v_b = emb_vert_b[:, :, j, :]
             emb_v_ab = torch.cat([emb_v_a, emb_v_b], dim=-1)
             w = self.reweight_ab(emb_v_ab)
             agg_vb.append(torch.bmm(emb_v_b.transpose(1, 2), w).squeeze() * gate_vert_b[:, :, j])
 
-            # ac propagating
+                            
             emb_v_a = torch.stack([emb_vert_a[:, :, j]] * (self.ratio[1] ** 2), dim=1)
             emb_v_c = emb_vert_c[:, :, j, :]
             emb_v_ac = torch.cat([emb_v_a, emb_v_c], dim=-1)
@@ -301,7 +301,7 @@ class GraphReasoning(nn.Module):
 
 
 class GuidedAttention(nn.Module):
-    """ Reconstruction Guided Attention. """
+                                            
 
     def __init__(self, depth=728, drop_rate=0.2):
         super(GuidedAttention, self).__init__()

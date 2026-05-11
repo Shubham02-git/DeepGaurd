@@ -7,7 +7,7 @@ import argparse
 from tqdm import tqdm
 import time
 from skimage import transform as trans
-# from color_transfer import color_transfer
+                                           
 from .warp import gen_warp_params, warp_by_params, warp_mask
 
 
@@ -39,7 +39,7 @@ def get_mask_center(mask):
 
 def get_5_keypoint(shape):
     def get_point(idx):
-        # return [shape.part(idx).x, shape.part(idx).y]
+                                                       
         return shape[idx]
 
     def center(pt1, pt2):
@@ -69,28 +69,28 @@ def get_boundary(mask):
     return boundary
 
 
-# def get_boundary(mask):
-#     if len(mask.shape) == 3:
-#         mask = mask[:, :, 0]
-#     mask = cv2.GaussianBlur(mask, (3, 3), 0)
-#     mask = mask.astype(np.uint8)
+                         
+                              
+                              
+                                              
+                                  
 
-#     # Dilation and Erosion to find the boundary
-#     dilated = cv2.dilate(mask, None, iterations=1)
-#     boundary = cv2.subtract(dilated, mask)
+                                                 
+                                                    
+                                            
 
-#     # normalize the boundary to have values between 0 and 1
-#     boundary = boundary / 255.
+                                                             
+                                
 
-#     return boundary
+                     
 
 
 
 def blur_mask(mask):
     blur_k = 2*np.random.randint(1, 10)-1
     
-    #kernel = np.ones((blur_k+1, blur_k+1), np.uint8)
-    #mask = cv2.erode(mask, kernel)
+                                                     
+                                   
     
     mask = cv2.GaussianBlur(mask, (blur_k, blur_k), 0)
 
@@ -104,7 +104,7 @@ def random_deform(pt, tgt, scale=0.3):
 
     x = x1+(x2-x1)*np.random.rand()*scale
     y = y1+(y2-y1)*np.random.rand()*scale
-    #print('before:', pt, ' after:', [int(x), int(y)])
+                                                      
     return [int(x), int(y)]
 
 
@@ -124,11 +124,11 @@ def get_specific_mask(img, shape, mtype='mouth', random_side=False):
     else:
         raise ValueError(f"Invalid mtype. Choose from 'eyes', 'nose', 'mouth', or 'eyebrows', but got {mtype}")
 
-    # find convex hull
+                      
     hull = cv2.convexHull(landmarks)
     hull = hull.astype(int)
 
-    # mask
+          
     hull_mask = np.zeros_like(img)
     cv2.fillPoly(hull_mask, [hull], (255, 255, 255))
     mask = hull_mask
@@ -139,11 +139,11 @@ def get_hull_mask(img, shape, mtype='hull'):
     if mtype == 'normal-hull':
         landmarks = np.array(shape)
 
-        # find convex hull
+                          
         hull = cv2.convexHull(landmarks)
         hull = hull.astype(int)
 
-        # full face mask
+                        
         hull_mask = np.zeros_like(img)
         cv2.fillPoly(hull_mask, [hull], (255, 255, 255))
         mask = hull_mask
@@ -152,11 +152,11 @@ def get_hull_mask(img, shape, mtype='hull'):
         landmarks = shape[17:]
         landmarks = np.array(landmarks)
 
-        # find convex hull
+                          
         hull = cv2.convexHull(landmarks)
         hull = hull.astype(int)
 
-        # full face mask
+                        
         hull_mask = np.zeros_like(img)
         cv2.fillPoly(hull_mask, [hull], (255, 255, 255))
 
@@ -165,11 +165,11 @@ def get_hull_mask(img, shape, mtype='hull'):
     elif mtype == 'inner-hull-no-eyebrow':
         landmarks = shape[27:]
         landmarks = np.array(landmarks)
-        # find convex hull
+                          
         hull = cv2.convexHull(landmarks)
         hull = hull.astype(int)
 
-        # full face mask
+                        
         hull_mask = np.zeros_like(img)
         cv2.fillPoly(hull_mask, [hull], (255, 255, 255))
 
@@ -177,19 +177,19 @@ def get_hull_mask(img, shape, mtype='hull'):
 
     elif mtype == 'mouth-hull':
         landmarks = shape[2:15]
-        #landmarks.append(shape[29])
+                                    
         landmarks = np.concatenate([landmarks, shape[29].reshape(1, -1)], axis=0)
 
-        # find convex hull
+                          
         hull = cv2.convexHull(landmarks)
         hull = hull.astype(int)
 
-        # full face mask
+                        
         hull_mask = np.zeros_like(img)
         cv2.fillPoly(hull_mask, [hull], (255, 255, 255))
 
-        # kernel = np.ones((2, 2), np.uint8)
-        # c_mask = cv2.dilate(hull_mask, kernel, iterations=1)
+                                            
+                                                              
         mask = hull_mask
 
     elif mtype == 'whole-hull':
@@ -200,24 +200,24 @@ def get_hull_mask(img, shape, mtype='hull'):
             if i >= 5 and i <= 11:
                 x, y = lmk[0], lmk[1]
                 lmk = [x, max(0, y+15)]
-            # lift the eyebrows to get a larger landmark convex hull
+                                                                    
             if i >= 18 and i <= 27:
                 x, y = lmk[0], lmk[1]
                 lmk = [x, max(0, y-face_height//4)]
 
             landmarks.append(lmk)
 
-        # find convex hull
+                          
         landmarks = np.array(landmarks, dtype=np.int32)
         hull = cv2.convexHull(landmarks)
         hull = np.reshape(hull, (1, -1, 2))
 
-        # full face mask
+                        
         hull_mask = np.zeros_like(img)
         cv2.fillPoly(hull_mask, [hull], (255, 255, 255))
 
-        # kernel = np.ones((2, 2), np.uint8)
-        # c_mask = cv2.dilate(hull_mask, kernel, iterations=1)
+                                            
+                                                              
         mask = hull_mask
     '''
     elif mtype == 'rect':
@@ -254,37 +254,37 @@ def get_mask(shape, img, std=20, deform=True, restrict_mask=None):
         else:
             mask = get_hull_mask(img, shape, mtype)
 
-        # random deform
+                       
         if np.random.rand() < 0.9:
             mask = warp_mask(mask, std=std)
 
-        # # random erode/dilate
-        # prob = np.random.rand()
-        # if prob < 0.3:
-        #     erode_k = 2*np.random.randint(1, 10)+1
-        #     kernel = np.ones((erode_k, erode_k), np.uint8)
-        #     mask = cv2.erode(mask, kernel)
-        # elif prob < 0.6:
-        #     erode_k = 2*np.random.randint(1, 10)+1
-        #     kernel = np.ones((erode_k, erode_k), np.uint8)
-        #     mask = cv2.dilate(mask, kernel)
+                               
+                                 
+                        
+                                                    
+                                                            
+                                            
+                          
+                                                    
+                                                            
+                                             
     else:
         mask = max_mask.copy()
     
     if restrict_mask is not None:
         mask = mask*(restrict_mask//255)
 
-    # restrict mask range
+                         
     mask = mask *(max_mask//255)
 
-    # random blur
+                 
     if deform and np.random.rand() < 0.9:
         mask = blur_mask(mask)
 
     return mask[:,:,0]
 
 def mask_postprocess(mask):
-    # random erode/dilate
+                         
     prob = np.random.rand()
     if prob < 0.3:
         erode_k = 2*np.random.randint(1, 10)+1
@@ -295,7 +295,7 @@ def mask_postprocess(mask):
         kernel = np.ones((erode_k, erode_k), np.uint8)
         mask = cv2.dilate(mask, kernel)
     
-    # random blur
+                 
     if np.random.rand() < 0.9:
         mask = blur_mask(mask)
 
@@ -303,27 +303,27 @@ def mask_postprocess(mask):
 
 
 def get_affine_param(from_, to_):
-        # use skimage tranformation
+                                   
     tform = trans.SimilarityTransform()
     tform.estimate(from_.astype(np.float32), to_.astype(
-        np.float32))  # tform.estimate(from_, to_)
+        np.float32))                              
     M = tform.params[0:2, :]
 
     return M
 
 
 def random_sharpen_img(img):
-    cand = ['bsharpen', 'gsharpen']  # , 'none']
+    cand = ['bsharpen', 'gsharpen']             
     mode = cand[np.random.randint(len(cand))]
-    # print('sharpen mode:', mode)
+                                  
     if mode == "bsharpen":
-        # Sharpening using filter2D
+                                   
         kernel = np.ones((3, 3)) * (-1)
         kernel[1, 1] = 9
-        #kernel /= 9.
+                     
         out = cv2.filter2D(img, -1, kernel)
     elif mode == "gsharpen":
-        # Sharpening using Weighted Method
+                                          
         gaussain_blur = cv2.GaussianBlur(img, (0, 0), 3.0)
         out = cv2.addWeighted(
             img, 1.5, gaussain_blur, -0.5, 0, img)
@@ -334,25 +334,25 @@ def random_sharpen_img(img):
 
 
 def random_blur_img(img):
-    cand = ['avg', 'gaussion', 'med']  # , 'none']
+    cand = ['avg', 'gaussion', 'med']             
     mode = cand[np.random.randint(len(cand))]
-    # print('blur mode:', mode)
+                               
     ksize = 2*np.random.randint(1, 5)+1
 
     if mode == 'avg':
-        # Averaging
+                   
         out = cv2.blur(img, (ksize, ksize))
     elif mode == 'gaussion':
-        # Gaussian Blurring
+                           
         out = cv2.GaussianBlur(img, (ksize, ksize), 0)
     elif mode == 'med':
-        # Median blurring
+                         
         out = cv2.medianBlur(img, ksize)
     else:
         out = img
-    # elif mode == 'bilateral'
-    #     # Bilateral Filtering
-    #     out = cv2.bilateralFilter(img,9,75,75)
+                              
+                               
+                                                
 
     return out
 
@@ -363,8 +363,8 @@ def random_warp_img(img, prob=0.5):
     choice = [True, False]
 
     out = warp_by_params(param, img,
-                         can_flip=False,  # choice[np.random.randint(2)],
-                         can_transform=False,  # choice[np.random.randint(2)],
+                         can_flip=False,                                 
+                         can_transform=False,                                 
                          can_warp=(np.random.randint(10) < int(prob*10)),
                          border_replicate=choice[np.random.randint(2)])
     return out
@@ -397,12 +397,12 @@ def main(args):
     tgt_5_pts = get_5_keypoint(tgt_shape)
     tgt_mask = get_mask(tgt_shape, tgt_im, whole=False, deform=True)
 
-    #aff_param = get_affine_param(src_5_pts, tgt_5_pts)
+                                                       
 
-    # color transfer:
+                     
     mask = src_mask[:, :, 0:1]/255.
     ct_modes = ['lct', 'rct', 'idt', 'idt-m', 'mkl', 'mkl-m',
-                'sot', 'sot-m', 'mix-m']  # , 'seamless-hist-match']
+                'sot', 'sot-m', 'mix-m']                            
     for mode in ct_modes:
         colored_src = color_transfer(mode, src_im, tgt_im, mask)
         cv2.imwrite('{}_colored.png'.format(mode), colored_src)
@@ -426,14 +426,14 @@ def main(args):
 
     center = get_mask_center(aligned_mask)
     print('mask center:', center)
-    # colored_src = transfer_color(aligned_src, tgt_im)
+                                                       
 
     init_blend = cv2.seamlessClone(
         aligned_src, tgt_im, aligned_mask, center, cv2.NORMAL_CLONE)
     cv2.imwrite('init_blended.png', init_blend)
 
-    # aligned_blend = cv2.warpAffine(
-    #    colored_blend, aff_param, (W, H), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REFLECT)
+                                     
+                                                                                                
     b_mask = tgt_mask[:, :, 0:1]/255.
     out_blend = init_blend*b_mask + tgt_im*(1. - b_mask)
     cv2.imwrite('out_blended.png', out_blend)

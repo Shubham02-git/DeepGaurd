@@ -17,13 +17,13 @@ from fastapi.responses import JSONResponse
 from PIL import Image
 from torchvision import transforms
 
-# Add training directory to path
+                                
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(ROOT, "training"))
 
-from detectors import DETECTOR  # type: ignore[import-not-found]
+from detectors import DETECTOR                                  
 
-# ─── Configuration ────────────────────────────────────────────────────────────
+                                                                                
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -35,7 +35,7 @@ MAX_VIDEO_FRAMES = 16
 
 LOGS_DIR = os.path.join(ROOT, "logs", "training")
 
-# Models available for selection — i3d excluded (video-only, requires clip batching)
+                                                                                    
 MODELS_REGISTRY: dict[str, str] = {
     "xception":       "training/config/detector/xception_dfd.yaml",
     "ucf":            "training/config/detector/ucf_dfd.yaml",
@@ -44,7 +44,7 @@ MODELS_REGISTRY: dict[str, str] = {
 
 DEFAULT_MODEL = "xception"
 
-# ─── Demo Whitelist ───────────────────────────────────────────────────────────
+                                                                                
 
 WHITELIST_PATH = Path(ROOT) / "demo_whitelist.txt"
 
@@ -57,18 +57,18 @@ def is_whitelisted(filename: str) -> bool:
     name = os.path.basename(filename).strip().lower()
     return name in load_whitelist()
 
-# ─── Checkpoint Auto-Discovery ────────────────────────────────────────────────
+                                                                                
 
 def find_latest_checkpoint(model_key: str) -> str | None:
-    """
-    Scans logs/training/ for the most recent folder starting with `{model_key}_`
-    and returns the path to test/avg/ckpt_best.pth if it exists.
-    """
+\
+\
+\
+       
     if not os.path.isdir(LOGS_DIR):
         return None
     candidates = sorted(
         [d for d in os.listdir(LOGS_DIR) if d.startswith(f"{model_key}_")],
-        reverse=True,  # lexicographic sort puts latest timestamp first
+        reverse=True,                                                  
     )
     for folder in candidates:
         ckpt = os.path.join(LOGS_DIR, folder, "test", "avg", "ckpt_best.pth")
@@ -76,7 +76,7 @@ def find_latest_checkpoint(model_key: str) -> str | None:
             return ckpt
     return None
 
-# ─── Model Loading ────────────────────────────────────────────────────────────
+                                                                                
 
 def load_config(path: str) -> dict:
     with open(path, "r") as f:
@@ -106,7 +106,7 @@ def load_model(cfg: dict, ckpt_path: str | None):
     return model
 
 
-# ─── Pre-load all models at startup ──────────────────────────────────────────
+                                                                               
 
 LOADED_MODELS: dict[str, object] = {}
 LOADED_CONFIGS: dict[str, dict] = {}
@@ -131,7 +131,7 @@ for key, cfg_path in MODELS_REGISTRY.items():
 
 print()
 
-# ─── Preprocessing ────────────────────────────────────────────────────────────
+                                                                                
 
 preprocess = transforms.Compose([
     transforms.Resize((IMG_SIZE, IMG_SIZE)),
@@ -141,22 +141,22 @@ preprocess = transforms.Compose([
 
 
 def preprocess_image(img: Image.Image) -> torch.Tensor:
-    """Convert PIL image → (1, 3, H, W) tensor on DEVICE."""
+                                                            
     img = img.convert("RGB")
-    return preprocess(img).unsqueeze(0).to(DEVICE)  # type: ignore[union-attr]
+    return preprocess(img).unsqueeze(0).to(DEVICE)                            
 
 
 def predict_tensor(tensor: torch.Tensor, model_key: str = DEFAULT_MODEL) -> dict:
-    """Run forward pass with the specified model and return label + confidence."""
+                                                                                  
     model = LOADED_MODELS.get(model_key)
     if model is None:
         raise ValueError(f"Model '{model_key}' is not loaded.")
 
     with torch.no_grad():
         data_dict = {"image": tensor, "label": torch.zeros(tensor.size(0), dtype=torch.long).to(DEVICE)}
-        out = model(data_dict, inference=True)  # type: ignore[misc]
+        out = model(data_dict, inference=True)                      
 
-        # Handle different output formats
+                                         
         if isinstance(out, dict):
             logits = out.get("cls", out.get("logits", out.get("output", None)))
         elif isinstance(out, torch.Tensor):
@@ -167,7 +167,7 @@ def predict_tensor(tensor: torch.Tensor, model_key: str = DEFAULT_MODEL) -> dict
         if logits is None:
             raise ValueError("Could not extract logits from model output")
 
-        probs = F.softmax(logits, dim=1)  # shape: (N, 2)  [real, fake]
+        probs = F.softmax(logits, dim=1)                               
 
     real_prob = probs[:, 0].mean().item()
     fake_prob = probs[:, 1].mean().item()
@@ -184,7 +184,7 @@ def predict_tensor(tensor: torch.Tensor, model_key: str = DEFAULT_MODEL) -> dict
 
 
 def extract_video_frames(video_bytes: bytes, n_frames: int = MAX_VIDEO_FRAMES) -> list[Image.Image]:
-    """Write bytes to temp file, sample N evenly-spaced frames."""
+                                                                  
     tmp_path = os.path.join(ROOT, f"tmp_video_{uuid.uuid4().hex}.mp4")
     with open(tmp_path, "wb") as f:
         f.write(video_bytes)
@@ -212,7 +212,7 @@ def extract_video_frames(video_bytes: bytes, n_frames: int = MAX_VIDEO_FRAMES) -
     return frames
 
 
-# ─── FastAPI App ──────────────────────────────────────────────────────────────
+                                                                                
 
 app = FastAPI(
     title="DeepFake Detector API",
@@ -222,7 +222,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # React dev server
+    allow_origins=["*"],                            
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -245,7 +245,7 @@ def health():
 
 @app.get("/models")
 def list_models():
-    """List all available models and their checkpoint status."""
+                                                                
     return {
         key: {
             "loaded":     LOADED_MODELS.get(key) is not None,
@@ -269,11 +269,11 @@ async def predict(
     filename     = file.filename or ""
     data         = await file.read()
 
-    # ── Whitelist check — always return REAL for demo files ────────────────
+                                                                             
     if is_whitelisted(filename):
         ext = os.path.basename(filename).lower().rsplit(".", 1)[-1]
         file_type = "image" if ext in {"jpg", "jpeg", "png", "bmp", "webp"} else "video"
-        # Simulate analysis time so it feels realistic
+                                                      
         delay = random.uniform(2.5, 4.5) if file_type == "image" else random.uniform(4.0, 7.0)
         await asyncio.sleep(delay)
         return JSONResponse(content={
@@ -288,7 +288,7 @@ async def predict(
         })
 
     try:
-        # ── Image ──────────────────────────────────────────────────────────
+                                                                             
         if content_type.startswith("image/") or filename.lower().endswith(
             (".jpg", ".jpeg", ".png", ".bmp", ".webp")
         ):
@@ -300,7 +300,7 @@ async def predict(
             result["model"]     = model
             return JSONResponse(content=result)
 
-        # ── Video ──────────────────────────────────────────────────────────
+                                                                             
         elif content_type.startswith("video/") or filename.lower().endswith(
             (".mp4", ".avi", ".mov", ".mkv", ".webm")
         ):
@@ -328,7 +328,7 @@ async def predict(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ─── Run ──────────────────────────────────────────────────────────────────────
+                                                                                
 
 if __name__ == "__main__":
     import uvicorn

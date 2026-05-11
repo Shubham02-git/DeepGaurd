@@ -32,30 +32,30 @@ def get_align_mat(face, size, should_align_eyes):
 
     mat_umeyama = mat_umeyama * size
 
-    # Convert to matrix
+                       
     landmarks = numpy.matrix(face.landmarks_as_xy())
 
-    # cv2 expects points to be in the form np.array([ [[x1, y1]], [[x2, y2]], ... ]), we'll expand the dim
+                                                                                                          
     landmarks = numpy.expand_dims(landmarks, axis=1)
 
-    # Align the landmarks using umeyama
+                                       
     umeyama_landmarks = cv2.transform(landmarks, mat_umeyama, landmarks.shape)
 
-    # Determine a rotation matrix to align eyes horizontally
+                                                            
     mat_align_eyes = align_eyes(umeyama_landmarks, size)
 
-    # Extend the 2x3 transform matrices to 3x3 so we can multiply them
-    # and combine them as one
+                                                                      
+                             
     mat_umeyama = numpy.matrix(mat_umeyama)
     mat_umeyama.resize((3, 3))
     mat_align_eyes = numpy.matrix(mat_align_eyes)
     mat_align_eyes.resize((3, 3))
     mat_umeyama[2] = mat_align_eyes[2] = [0, 0, 1]
 
-    # Combine the umeyama transform with the extra rotation matrix
+                                                                  
     transform_mat = mat_align_eyes * mat_umeyama
 
-    # Remove the extra row added, shape needs to be 2x3
+                                                       
     transform_mat = numpy.delete(transform_mat, 2, 0)
     transform_mat = transform_mat / size
     return transform_mat
@@ -65,42 +65,42 @@ from .face_blend import get_5_keypoint
 
 def get_align_mat_new(src_lmk, tgt_lmk, size=256, should_align_eyes=False):
     mat_umeyama = umeyama(get_5_keypoint(src_lmk), get_5_keypoint(tgt_lmk), True)[0:2]
-    # mat_umeyama = umeyama(numpy.array(src_lmk[17:]), numpy.array(tgt_lmk[17:]), True)[0:2]
+                                                                                            
 
     if should_align_eyes is False:
         return mat_umeyama
 
     mat_umeyama = mat_umeyama * size
 
-    # Convert to matrix
+                       
     landmarks = numpy.matrix(face.landmarks_as_xy())
 
-    # cv2 expects points to be in the form np.array([ [[x1, y1]], [[x2, y2]], ... ]), we'll expand the dim
+                                                                                                          
     landmarks = numpy.expand_dims(landmarks, axis=1)
 
-    # Align the landmarks using umeyama
+                                       
     umeyama_landmarks = cv2.transform(landmarks, mat_umeyama, landmarks.shape)
 
-    # Determine a rotation matrix to align eyes horizontally
+                                                            
     mat_align_eyes = align_eyes(umeyama_landmarks, size)
 
-    # Extend the 2x3 transform matrices to 3x3 so we can multiply them
-    # and combine them as one
+                                                                      
+                             
     mat_umeyama = numpy.matrix(mat_umeyama)
     mat_umeyama.resize((3, 3))
     mat_align_eyes = numpy.matrix(mat_align_eyes)
     mat_align_eyes.resize((3, 3))
     mat_umeyama[2] = mat_align_eyes[2] = [0, 0, 1]
 
-    # Combine the umeyama transform with the extra rotation matrix
+                                                                  
     transform_mat = mat_align_eyes * mat_umeyama
 
-    # Remove the extra row added, shape needs to be 2x3
+                                                       
     transform_mat = numpy.delete(transform_mat, 2, 0)
     transform_mat = transform_mat / size
     return transform_mat
 
-# Code borrowed from https://github.com/jrosebr1/imutils/blob/d5cb29d02cf178c399210d5a139a821dfb0ae136/imutils/face_utils/helpers.py
+                                                                                                                                    
 """
 The MIT License (MIT)
 
@@ -129,8 +129,8 @@ from collections import OrderedDict
 import numpy as np
 import cv2
 
-# define a dictionary that maps the indexes of the facial
-# landmarks to specific face regions
+                                                         
+                                    
 FACIAL_LANDMARKS_IDXS = OrderedDict([
     ("mouth", (48, 68)),
     ("right_eyebrow", (17, 22)),
@@ -142,32 +142,32 @@ FACIAL_LANDMARKS_IDXS = OrderedDict([
     ("chin", (8, 11))
 ])
 
-# Returns a rotation matrix that when applied to the 68 input facial landmarks
-# results in landmarks with eyes aligned horizontally
+                                                                              
+                                                     
 def align_eyes(landmarks, size):
-    desiredLeftEye = (0.35, 0.35) # (y, x) value
+    desiredLeftEye = (0.35, 0.35)               
     desiredFaceWidth = desiredFaceHeight = size
 
-    # extract the left and right eye (x, y)-coordinates
+                                                       
     (lStart, lEnd) = FACIAL_LANDMARKS_IDXS["left_eye"]
     (rStart, rEnd) = FACIAL_LANDMARKS_IDXS["right_eye"]
     leftEyePts = landmarks[lStart:lEnd]
     rightEyePts = landmarks[rStart:rEnd]
 
-    # compute the center of mass for each eye
+                                             
     leftEyeCenter = leftEyePts.mean(axis=0).astype("int")
     rightEyeCenter = rightEyePts.mean(axis=0).astype("int")
 
-    # compute the angle between the eye centroids
+                                                 
     dY = rightEyeCenter[0,1] - leftEyeCenter[0,1]
     dX = rightEyeCenter[0,0] - leftEyeCenter[0,0]
     angle = np.degrees(np.arctan2(dY, dX)) - 180
 
-    # compute center (x, y)-coordinates (i.e., the median point)
-    # between the two eyes in the input image
+                                                                
+                                             
     eyesCenter = ((leftEyeCenter[0,0] + rightEyeCenter[0,0]) // 2, (leftEyeCenter[0,1] + rightEyeCenter[0,1]) // 2)
 
-    # grab the rotation matrix for rotating and scaling the face
+                                                                
     M = cv2.getRotationMatrix2D(eyesCenter, angle, 1.0)
 
     return M

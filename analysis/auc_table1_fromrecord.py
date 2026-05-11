@@ -36,7 +36,7 @@ def replace_name(csv_name: str):
         raise ValueError(f'Unknown csv name: {csv_name}')
     return return_name
 
-detectors = glob.glob(os.path.join('exp1_record/*'))  # Assuming the script is running in the parent directory
+detectors = glob.glob(os.path.join('exp1_record/*'))                                                          
 results = []
 
 for detector in detectors:
@@ -44,21 +44,21 @@ for detector in detectors:
 
     for csv_file in csv_files:
         df = pd.read_csv(csv_file)
-        top_3_auc = df['Value'].nlargest(3).mean()  # Get mean of top 3 AUC
+        top_3_auc = df['Value'].nlargest(3).mean()                         
         
-        test_data = os.path.basename(csv_file).replace('.csv','')  # Assuming test_data is the file name
+        test_data = os.path.basename(csv_file).replace('.csv','')                                       
         results.append({'Detector': detector.replace('exp1_record/', ''), 'Test Data': replace_name(test_data), 'Top-3 AUC': top_3_auc})
 
-# Convert list of dicts to DataFrame
+                                    
 df_results = pd.DataFrame(results)
 
-# Pivot the dataframe to have detectors as rows and test_data as columns
+                                                                        
 final_df = df_results.pivot(index='Detector', columns='Test Data', values='Top-3 AUC')
 
-# Add the 'avg' column as the mean of other columns
+                                                   
 final_df['Avg.'] = final_df.mean(axis=1)
 
 print(final_df)
 
-# Save the dataframe to excel
+                             
 final_df.to_excel('auc_table1_fromrecord.xlsx')

@@ -50,7 +50,7 @@ class UIAViTDetector(AbstractDetector):
         pass
 
     def classifier(self, features: torch.Tensor) -> torch.Tensor:
-        pass  # do not overwrite this, since classifier structure has been written in self.forward()
+        pass                                                                                        
 
     def get_losses(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict["label"]
@@ -65,9 +65,9 @@ class UIAViTDetector(AbstractDetector):
                                              self.fake_feature_mean,
                                              self.fake_inv_covariance,
                                              data_dict["label"])
-            overall_loss = ce_loss + \
-                           self.loss_weight[0] * pcl_loss + \
-                           self.loss_weight[1] * (1 / torch.abs(self.model.c_real) + 1 / torch.abs(self.model.c_fake)) + \
+            overall_loss = ce_loss +\
+                           self.loss_weight[0] * pcl_loss +\
+                           self.loss_weight[1] * (1 / torch.abs(self.model.c_real) + 1 / torch.abs(self.model.c_fake)) +\
                            self.loss_weight[2] * torch.abs(self.model.c_cross)
 
             return {"overall": overall_loss, "ce_loss": ce_loss, "pcl_loss": pcl_loss,
@@ -84,7 +84,7 @@ class UIAViTDetector(AbstractDetector):
         return metric_batch_dict
 
     def forward(self, data_dict: dict, inference=False) -> dict:
-        # compute MVG
+                     
         if self.model.training and self.batch_cnt != 0 and self.batch_cnt % (self.config["batch_per_epoch"] // 2) == 0:
             real_feature_tensor = torch.cat(self.real_feature_list, dim=0).cuda()
             self.real_inv_covariance = fit_inv_covariance(real_feature_tensor).cpu()
@@ -99,14 +99,14 @@ class UIAViTDetector(AbstractDetector):
         step = self.batch_cnt / (self.batch_per_epoch * self.num_epoch) if self.model.training else 1
         pred, feature_patch, attention_map = self.model(data_dict["image"], step=step)
 
-        # collect features of real patches and inner fake patches
+                                                                 
         real_indices = torch.where(data_dict["label"] == 0.0)[0]
         feature_patch_real = feature_patch[real_indices[:4]]
         B, H, W, C = feature_patch_real.size()
         self.real_feature_list.append(feature_patch_real.reshape(B * H * W, C).cpu().detach())
 
         fake_indices = torch.where(data_dict["label"] == 1.0)[0]
-        feature_patch_fake = feature_patch[fake_indices[:4], 3:11, 3:11, :]  # hard coding, extend config to modify if needed
+        feature_patch_fake = feature_patch[fake_indices[:4], 3:11, 3:11, :]                                                  
         B, H, W, C = feature_patch_fake.size()
         self.fake_feature_list.append(feature_patch_fake.reshape(B * H * W, C).cpu().detach())
 
@@ -151,7 +151,7 @@ class Attention(nn.Module):
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim // num_heads
-        # NOTE scale factor was wrong in my original version, can set manually to be compat with prev weights
+                                                                                                             
         self.scale = qk_scale or head_dim ** -0.5
 
         self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
@@ -161,9 +161,9 @@ class Attention(nn.Module):
 
     def forward(self, x):
         B, N, C = x.shape
-        # [B, 196, 768] -> [B, 196, 768*3] -> [B, 196, 3, 8, 96] -> [3, B, 8, 196, 96]
+                                                                                      
         qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
-        q, k, v = qkv[0], qkv[1], qkv[2]  # make torchscript happy (cannot use tensor as tuple)
+        q, k, v = qkv[0], qkv[1], qkv[2]                                                       
 
         attn_qk = (q @ k.transpose(-2, -1)) * self.scale
         attn_s = attn_qk.softmax(dim=-1)
@@ -182,7 +182,7 @@ class Block(nn.Module):
         self.norm1 = norm_layer(dim)
         self.attn = Attention(
             dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop)
-        # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
+                                                                                                
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
@@ -196,8 +196,8 @@ class Block(nn.Module):
 
 
 class PatchEmbed(nn.Module):
-    """ Image to Patch Embedding
-    """
+\
+       
 
     def __init__(self, img_size=224, patch_size=16, in_chans=3, embed_dim=768):
         super().__init__()
@@ -212,17 +212,17 @@ class PatchEmbed(nn.Module):
 
     def forward(self, x):
         B, C, H, W = x.shape
-        # FIXME look at relaxing size constraints
-        # assert H == self.img_size[0] and W == self.img_size[1], \
-        # f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
-        x = self.proj(x).flatten(2).transpose(1, 2)  # [B, H*W, C]
+                                                 
+                                                                   
+                                                                                                    
+        x = self.proj(x).flatten(2).transpose(1, 2)               
         return x
 
 
 class HybridEmbed(nn.Module):
-    """ CNN Feature Map Embedding
-    Extract feature map from CNN, flatten, project to embedding dim.
-    """
+\
+\
+       
 
     def __init__(self, backbone, img_size=224, feature_size=None, in_chans=3, embed_dim=768):
         super().__init__()
@@ -232,9 +232,9 @@ class HybridEmbed(nn.Module):
         self.backbone = backbone
         if feature_size is None:
             with torch.no_grad():
-                # FIXME this is hacky, but most reliable way of determining the exact dim of the output feature
-                # map for all networks, the feature metadata has reliable channel and stride info, but using
-                # stride to calc feature dim requires info about padding of each stage that isn't captured.
+                                                                                                               
+                                                                                                            
+                                                                                                           
                 training = backbone.training
                 if training:
                     backbone.eval()
@@ -256,15 +256,15 @@ class HybridEmbed(nn.Module):
 
 
 class VisionTransformer(nn.Module):
-    """ Vision Transformer with support for patch or hybrid CNN input stage
-    """
+\
+       
 
     def __init__(self, img_size=224, patch_size=16, in_chans=3, num_classes=1000, embed_dim=768, depth=12,
                  num_heads=12, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop_rate=0., attn_drop_rate=0.,
                  drop_path_rate=0., hybrid_backbone=None, norm_layer=nn.LayerNorm):
         super().__init__()
         self.num_classes = num_classes
-        self.num_features = self.embed_dim = embed_dim  # num_features for consistency with other models
+        self.num_features = self.embed_dim = embed_dim                                                  
 
         if hybrid_backbone is not None:
             self.patch_embed = HybridEmbed(
@@ -282,7 +282,7 @@ class VisionTransformer(nn.Module):
         self.c_fake = nn.Parameter(torch.tensor(0.6))
         self.c_cross = nn.Parameter(torch.tensor(0.2))
 
-        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]  # stochastic depth decay rule
+        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]                               
         self.blocks = nn.ModuleList([
             Block(
                 dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, qk_scale=qk_scale,
@@ -291,11 +291,11 @@ class VisionTransformer(nn.Module):
         self.norm = norm_layer(embed_dim)
         self.norm_middle = norm_layer(embed_dim)
 
-        # NOTE as per official impl, we could have a pre-logits representation dense layer + tanh here
-        # self.repr = nn.Linear(embed_dim, representation_size)
-        # self.repr_act = nn.Tanh()
+                                                                                                      
+                                                               
+                                   
 
-        # Classifier head
+                         
         self.head = nn.Linear(embed_dim * 2, num_classes) if num_classes > 0 else nn.Identity()
 
         trunc_normal_(self.pos_embed, std=.02)
@@ -327,7 +327,7 @@ class VisionTransformer(nn.Module):
             feat_blk = attn_blk - 1
         B = x.shape[0]
         x = self.patch_embed(x)
-        cls_tokens = self.cls_token.expand(B, -1, -1)  # stole cls_tokens impl from Phil Wang, thanks
+        cls_tokens = self.cls_token.expand(B, -1, -1)                                                
         x = torch.cat((cls_tokens, x), dim=1)
         x = x + self.pos_embed
         x = self.pos_drop(x)
@@ -338,7 +338,7 @@ class VisionTransformer(nn.Module):
                 if i == attn_blk:
                     attn_block = attn
                 x, attn = blk(x)
-            x = self.norm(x)  # for vit_base_patch16_224: x.size() = [B, 14**2+1 (197) , 768]
+            x = self.norm(x)                                                                 
             if i == attn_blk - 1:
                 attn_block = attn
             if i == feat_blk - 1:
@@ -351,7 +351,7 @@ class VisionTransformer(nn.Module):
                 if i in attn_blk:
                     attn_list.append(attn)
                 x, attn = blk(x)
-            x = self.norm(x)  # for vit_base_patch16_224: x.size() = [B, 14**2+1 (197) , 768]
+            x = self.norm(x)                                                                 
             if (i + 1) in attn_blk:
                 attn_list.append(attn)
             if i == feat_blk - 1:

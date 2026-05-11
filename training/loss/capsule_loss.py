@@ -10,17 +10,17 @@ class CapsuleLoss(AbstractLossClass):
         self.cross_entropy_loss = nn.CrossEntropyLoss()
 
     def forward(self, inputs, targets):
-        """
-        Computes the capsule loss.
-
-        Args:
-            inputs: A PyTorch tensor of size (batch_size, num_classes) containing the predicted scores.
-            targets: A PyTorch tensor of size (batch_size) containing the ground-truth class indices.
-
-        Returns:
-            A scalar tensor representing the capsule loss.
-        """
-        # Compute the capsule loss
+\
+\
+\
+\
+\
+\
+\
+\
+\
+           
+                                  
         loss_t = self.cross_entropy_loss(inputs[:,0,:], targets)
 
         for i in range(inputs.size(1) - 1):

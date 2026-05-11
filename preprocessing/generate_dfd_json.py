@@ -3,7 +3,7 @@ import json
 import random
 from pathlib import Path
 
-# ── Config ────────────────────────────────────────────────────────────────────
+                                                                                
 BASE = Path(r"F:\repo's\DeepfakeBench-main\DeepfakeBench-main\datasets\rgb\Celeb-DF-v2")
 FAKE_FRAMES = BASE / "fake" / "frames"
 REAL_FRAMES = BASE / "real" / "frames"
@@ -12,19 +12,19 @@ OUTPUT_JSON = Path(r"F:\repo's\DeepfakeBench-main\DeepfakeBench-main\preprocessi
 
 TRAIN_RATIO = 0.80
 VAL_RATIO   = 0.10
-# TEST_RATIO  = remaining (0.10)
+                                
 
 SEED = 42
-# ──────────────────────────────────────────────────────────────────────────────
+                                                                                
 
 random.seed(SEED)
 
 
 def collect_split(frames_dir: Path, label: str) -> dict:
-    """
-    Find all video subfolders with extracted frames, split into train/val/test.
-    Returns dict: {"train": {...}, "val": {...}, "test": {...}}
-    """
+\
+\
+\
+       
     if not frames_dir.exists():
         print(f"[WARN] Frames directory not found: {frames_dir}")
         print("       Run  python preprocessing/preprocess_dfd.py  first.")
@@ -35,11 +35,11 @@ def collect_split(frames_dir: Path, label: str) -> dict:
         print(f"[WARN] No video frame folders found in {frames_dir}")
         return {"train": {}, "val": {}, "test": {}}
 
-    # filter out empties
+                        
     video_dirs = [d for d in video_dirs if any(d.glob("*.png"))]
     print(f"  {label}: {len(video_dirs)} videos with frames")
 
-    # shuffle & split
+                     
     random.shuffle(video_dirs)
     n = len(video_dirs)
     n_train = int(n * TRAIN_RATIO)

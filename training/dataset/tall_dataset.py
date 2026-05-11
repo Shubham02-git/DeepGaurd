@@ -14,7 +14,7 @@ from torchvision.utils import save_image
 from training.dataset import DeepfakeAbstractBaseDataset
 from einops import rearrange
 
-FFpp_pool = ['FaceForensics++', 'FaceShifter', 'DeepFakeDetection', 'FF-DF', 'FF-F2F', 'FF-FS', 'FF-NT']  #
+FFpp_pool = ['FaceForensics++', 'FaceShifter', 'DeepFakeDetection', 'FF-DF', 'FF-F2F', 'FF-FS', 'FF-NT']   
 
 
 def all_in_pool(inputs, pool):
@@ -26,37 +26,37 @@ def all_in_pool(inputs, pool):
 
 class TALLDataset(DeepfakeAbstractBaseDataset):
     def __init__(self, config=None, mode='train'):
-        """Initializes the dataset object.
-
-        Args:
-            config (dict): A dictionary containing configuration parameters.
-            mode (str): A string indicating the mode (train or test).
-
-        Raises:
-            NotImplementedError: If mode is not train or test.
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+           
         super().__init__(config, mode)
 
         assert self.video_level, "TALL is a videl-based method"
         assert int(self.clip_size ** 0.5) ** 2 == self.clip_size, 'clip_size must be square of an integer, e.g., 4'
 
     def __getitem__(self, index, no_norm=False):
-        """
-        Returns the data point at the given index.
-
-        Args:
-            index (int): The index of the data point.
-
-        Returns:
-            A tuple containing the image tensor, the label tensor, the landmark tensor,
-            and the mask tensor.
-        """
-        # Get the image paths and label
+\
+\
+\
+\
+\
+\
+\
+\
+\
+           
+                                       
         image_paths = self.data_dict['image'][index]
         label = self.data_dict['label'][index]
 
         if not isinstance(image_paths, list):
-            image_paths = [image_paths]  # for the image-level IO, only one frame is used
+            image_paths = [image_paths]                                                  
 
         image_tensors = []
         landmark_tensors = []
@@ -64,24 +64,24 @@ class TALLDataset(DeepfakeAbstractBaseDataset):
         augmentation_seed = None
 
         for image_path in image_paths:
-            # Initialize a new seed for data augmentation at the start of each video
+                                                                                    
             if self.video_level and image_path == image_paths[0]:
                 augmentation_seed = random.randint(0, 2 ** 32 - 1)
 
-            # Get the mask and landmark paths
-            mask_path = image_path.replace('frames', 'masks')  # Use .png for mask
-            landmark_path = image_path.replace('frames', 'landmarks').replace('.png', '.npy')  # Use .npy for landmark
+                                             
+            mask_path = image_path.replace('frames', 'masks')                     
+            landmark_path = image_path.replace('frames', 'landmarks').replace('.png', '.npy')                         
 
-            # Load the image
+                            
             try:
                 image = self.load_rgb(image_path)
             except Exception as e:
-                # Skip this image and return the first one
+                                                          
                 print(f"Error loading image at index {index}: {e}")
                 return self.__getitem__(0)
-            image = np.array(image)  # Convert to numpy array for data augmentation
+            image = np.array(image)                                                
 
-            # Load mask and landmark (if needed)
+                                                
             if self.config['with_mask']:
                 mask = self.load_mask(mask_path)
             else:
@@ -91,13 +91,13 @@ class TALLDataset(DeepfakeAbstractBaseDataset):
             else:
                 landmarks = None
 
-            # Do Data Augmentation
+                                  
             if self.mode == 'train' and self.config['use_data_augmentation']:
                 image_trans, landmarks_trans, mask_trans = self.data_aug(image, landmarks, mask, augmentation_seed)
             else:
                 image_trans, landmarks_trans, mask_trans = deepcopy(image), deepcopy(landmarks), deepcopy(mask)
 
-            # To tensor and normalize
+                                     
             if not no_norm:
                 image_trans = self.normalize(self.to_tensor(image_trans))
                 if self.config['with_landmark']:
@@ -111,10 +111,10 @@ class TALLDataset(DeepfakeAbstractBaseDataset):
 
         if self.video_level:
 
-            # Stack image tensors along a new dimension (time)
+                                                              
             image_tensors = torch.stack(image_tensors, dim=0)
 
-            # cut out 16x16 patch
+                                 
             F, C, H, W = image_tensors.shape
             x, y = np.random.randint(W), np.random.randint(H)
             x1 = np.clip(x - self.config['mask_grid_size'] // 2, 0, W)
@@ -123,22 +123,22 @@ class TALLDataset(DeepfakeAbstractBaseDataset):
             y2 = np.clip(y + self.config['mask_grid_size'] // 2, 0, H)
             image_tensors[:, :, y1:y2, x1:x2] = -1
 
-            # # concatenate sub-image and reszie to 224x224
-            # image_tensors = image_tensors.reshape(-1, H, W)
-            # image_tensors = rearrange(image_tensors, '(rh rw c) h w -> c (rh h) (rw w)', rh=2, c=C)
-            # image_tensors = nn.functional.interpolate(image_tensors.unsqueeze(0),
-            #                                           size=(self.config['resolution'], self.config['resolution']),
-            #                                           mode='bilinear', align_corners=False).squeeze(0)
-            # Stack landmark and mask tensors along a new dimension (time)
+                                                           
+                                                             
+                                                                                                     
+                                                                                   
+                                                                                                                    
+                                                                                                        
+                                                                          
             if not any(landmark is None or (isinstance(landmark, list) and None in landmark) for landmark in
                        landmark_tensors):
                 landmark_tensors = torch.stack(landmark_tensors, dim=0)
             if not any(m is None or (isinstance(m, list) and None in m) for m in mask_tensors):
                 mask_tensors = torch.stack(mask_tensors, dim=0)
         else:
-            # Get the first image tensor
+                                        
             image_tensors = image_tensors[0]
-            # Get the first landmark and mask tensors
+                                                     
             if not any(landmark is None or (isinstance(landmark, list) and None in landmark) for landmark in
                        landmark_tensors):
                 landmark_tensors = landmark_tensors[0]
@@ -155,7 +155,7 @@ if __name__ == "__main__":
         config=config,
         mode='train',
     )
-    train_data_loader = \
+    train_data_loader =\
         torch.utils.data.DataLoader(
             dataset=train_set,
             batch_size=config['train_batchSize'],

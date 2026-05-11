@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+                      
+                                                                       
 
-"""BatchNorm (BN) utility functions and custom batch-size BN implementations"""
+                                                                               
 
 from functools import partial
 import torch
@@ -13,13 +13,13 @@ import slowfast.utils.distributed as du
 
 
 def get_norm(cfg):
-    """
-    Args:
-        cfg (CfgNode): model building configs, details are in the comments of
-            the config file.
-    Returns:
-        nn.Module: the normalization layer.
-    """
+\
+\
+\
+\
+\
+\
+       
     if cfg.BN.NORM_TYPE == "batchnorm":
         return nn.BatchNorm3d
     elif cfg.BN.NORM_TYPE == "sub_batchnorm":
@@ -35,26 +35,26 @@ def get_norm(cfg):
 
 
 class SubBatchNorm3d(nn.Module):
-    """
-    The standard BN layer computes stats across all examples in a GPU. In some
-    cases it is desirable to compute stats across only a subset of examples
-    (e.g., in multigrid training https://arxiv.org/abs/1912.00998).
-    SubBatchNorm3d splits the batch dimension into N splits, and run BN on
-    each of them separately (so that the stats are computed on each subset of
-    examples (1/N of batch) independently. During evaluation, it aggregates
-    the stats from all splits into one BN.
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self, num_splits, **args):
-        """
-        Args:
-            num_splits (int): number of splits.
-            args (list): other arguments.
-        """
+\
+\
+\
+\
+           
         super(SubBatchNorm3d, self).__init__()
         self.num_splits = num_splits
         num_features = args["num_features"]
-        # Keep only one set of weight and bias.
+                                               
         if args.get("affine", True):
             self.affine = True
             args["affine"] = False
@@ -67,13 +67,13 @@ class SubBatchNorm3d(nn.Module):
         self.split_bn = nn.BatchNorm3d(**args)
 
     def _get_aggregated_mean_std(self, means, stds, n):
-        """
-        Calculate the aggregated mean and stds.
-        Args:
-            means (tensor): mean values.
-            stds (tensor): standard deviations.
-            n (int): number of sets of means and stds.
-        """
+\
+\
+\
+\
+\
+\
+           
         mean = means.view(n, -1).sum(0) / n
         std = (
             stds.view(n, -1).sum(0) / n
@@ -82,9 +82,9 @@ class SubBatchNorm3d(nn.Module):
         return mean.detach(), std.detach()
 
     def aggregate_stats(self):
-        """
-        Synchronize running_mean, and running_var. Call this before eval.
-        """
+\
+\
+           
         if self.split_bn.track_running_stats:
             (
                 self.bn.running_mean.data,
@@ -110,16 +110,16 @@ class SubBatchNorm3d(nn.Module):
 
 
 class GroupGather(Function):
-    """
-    GroupGather performs all gather on each of the local process/ GPU groups.
-    """
+\
+\
+       
 
     @staticmethod
     def forward(ctx, input, num_sync_devices, num_groups):
-        """
-        Perform forwarding, gathering the stats across different process/ GPU
-        group.
-        """
+\
+\
+\
+           
         ctx.num_sync_devices = num_sync_devices
         ctx.num_groups = num_groups
 
@@ -144,10 +144,10 @@ class GroupGather(Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        """
-        Perform backwarding, gathering the gradients across different process/ GPU
-        group.
-        """
+\
+\
+\
+           
         grad_output_list = [
             torch.zeros_like(grad_output) for k in range(du.get_local_size())
         ]
@@ -173,12 +173,12 @@ class GroupGather(Function):
 
 class NaiveSyncBatchNorm3d(nn.BatchNorm3d):
     def __init__(self, num_sync_devices, **args):
-        """
-        Naive version of Synchronized 3D BatchNorm.
-        Args:
-            num_sync_devices (int): number of device to sync.
-            args (list): other arguments.
-        """
+\
+\
+\
+\
+\
+           
         self.num_sync_devices = num_sync_devices
         if self.num_sync_devices > 0:
             assert du.get_local_size() % self.num_sync_devices == 0, (

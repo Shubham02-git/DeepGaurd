@@ -122,10 +122,10 @@ class PCATemplateMap(nn.Module):
     return mask, v
 
 class Xception(nn.Module):
-  """
-  Xception optimized for the ImageNet dataset, as specified in
-  https://arxiv.org/pdf/1610.02357.pdf
-  """
+\
+\
+\
+     
   def __init__(self, maptype, templates, num_classes=1000):
     super(Xception, self).__init__()
     self.num_classes = num_classes

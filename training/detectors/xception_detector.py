@@ -34,11 +34,11 @@ class XceptionDetector(AbstractDetector):
         self.correct, self.total = 0, 0
         
     def build_backbone(self, config):
-        # prepare the backbone
+                              
         backbone_class = BACKBONE[config['backbone_name']]
         model_config = config['backbone_config']
         backbone = backbone_class(model_config)
-        # if donot load the pretrained weights, fail to get good results
+                                                                        
         state_dict = torch.load(config['pretrained'])
         for name, weights in state_dict.items():
             if 'pointwise' in name:
@@ -49,13 +49,13 @@ class XceptionDetector(AbstractDetector):
         return backbone
     
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         loss_func = loss_class()
         return loss_func
     
     def features(self, data_dict: dict) -> torch.Tensor:
-        return self.backbone.features(data_dict['image']) #32,3,256,256
+        return self.backbone.features(data_dict['image'])              
 
     def classifier(self, features: torch.Tensor) -> torch.Tensor:
         return self.backbone.classifier(features)
@@ -69,20 +69,20 @@ class XceptionDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         metric_batch_dict = {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
-        # we dont compute the video-level metrics for training
+                                                              
         self.video_names = []
         return metric_batch_dict
 
     def forward(self, data_dict: dict, inference=False) -> dict:
-        # get the features by backbone
+                                      
         features = self.features(data_dict)
-        # get the prediction by classifier
+                                          
         pred = self.classifier(features)
-        # get the probability of the pred
+                                         
         prob = torch.softmax(pred, dim=1)[:, 1]
-        # build the prediction dict for each output
+                                                   
         pred_dict = {'cls': pred, 'prob': prob, 'feat': features}
         return pred_dict

@@ -20,8 +20,8 @@ from torchvision import transforms as T
 
 import skimage.draw
 import albumentations as alb
-from albumentations import Compose, RandomBrightnessContrast, \
-    HorizontalFlip, FancyPCA, HueSaturationValue, OneOf, ToGray, \
+from albumentations import Compose, RandomBrightnessContrast,\
+    HorizontalFlip, FancyPCA, HueSaturationValue, OneOf, ToGray,\
     ShiftScaleRotate, ImageCompression, PadIfNeeded, GaussNoise, GaussianBlur, RandomResizedCrop
 from torch.utils.data.sampler import Sampler
 from .abstract_dataset import DeepfakeAbstractBaseDataset
@@ -35,16 +35,16 @@ fake_dict = {
     'Face2Face': 2,
     'FaceSwap': 3, 
     'NeuralTextures': 4, 
-    # 'Deepfakes_Face2Face': 5, 
-    # 'Deepfakes_FaceSwap': 6, 
-    # 'Deepfakes_NeuralTextures': 7, 
-    # 'Deepfakes_real': 8, 
-    # 'Face2Face_FaceSwap': 9, 
-    # 'Face2Face_NeuralTextures': 10, 
-    # 'Face2Face_real': 11, 
-    # 'FaceSwap_NeuralTextures': 12, 
-    # 'FaceSwap_real': 13, 
-    # 'NeuralTextures_real': 14,
+                                
+                               
+                                     
+                           
+                               
+                                      
+                            
+                                     
+                           
+                                
 }
 
 
@@ -67,10 +67,10 @@ class RandomDownScale(alb.core.transforms_interface.ImageOnlyTransform):
 
 
 augmentation_methods = alb.Compose([
-    # alb.RandomBrightnessContrast(brightness_limit=(-0.1,0.1), contrast_limit=(-0.1,0.1), p=0.5),
-    # HorizontalFlip(p=0.5),
-    # RandomDownScale(p=0.5),
-    # alb.Sharpen(alpha=(0.2, 0.5), lightness=(0.5, 1.0), p=0.5),
+                                                                                                  
+                            
+                             
+                                                                 
     alb.ImageCompression(quality_lower=40,quality_upper=100,p=0.5),
     GaussianBlur(blur_limit=[3, 7], p=0.5)
 ], p=1.)
@@ -92,7 +92,7 @@ transforms1 = T.Compose([
             normalize
         ])
 
-#==========================================
+                                           
 
 def load_rgb(file_path, size=256):
     assert os.path.exists(file_path), f"{file_path} is not exists"
@@ -121,14 +121,14 @@ def add_gaussian_noise(ins, mean=0, stddev=0.1):
     return torch.clamp(ins + noise, -1, 1)
 
 
-# class RandomBlur(object):
-#     """ Randomly blur an image 
-#     """
-#     def __init__(self, ratio,)
+                           
+                                 
+         
+                                
 
-# class RandomCompression(object):
-#     """ Randomly compress an image 
-#     """
+                                  
+                                     
+         
 
 class CustomSampler(Sampler):
     def __init__(self, num_groups=2*360, n_frame_per_vid=32, videos_per_group=5, batch_size=10):
@@ -143,20 +143,20 @@ class CustomSampler(Sampler):
         group_indices = list(range(self.num_groups))
         random.shuffle(group_indices)
 
-        # For each batch
+                        
         for i in range(0, len(group_indices), self.groups_per_batch):
             selected_groups = group_indices[i:i+self.groups_per_batch]
             
-            # For each group
+                            
             for group in selected_groups:
-                frame_idx = random.randint(0, self.n_frame_per_vid - 1)  # Random frame index for this group's videos
+                frame_idx = random.randint(0, self.n_frame_per_vid - 1)                                              
                 
-                # Return the frame for each video in this group using the same frame_idx
+                                                                                        
                 for video_offset in range(self.videos_per_group):
                     yield group * self.videos_per_group * self.n_frame_per_vid + video_offset * self.n_frame_per_vid + frame_idx
 
     def __len__(self):
-        return self.num_groups * self.videos_per_group  # Total frames
+        return self.num_groups * self.videos_per_group                
 
 
 
@@ -190,10 +190,10 @@ class LSDADataset(DeepfakeAbstractBaseDataset):
         self.mode = mode
         self.res = config['resolution']
         self.fake_dict = fake_dict
-        # transform
+                   
         self.normalize = T.Normalize(mean=config['mean'],
                                      std =config['std'])
-        # data aug and transform
+                                
         self.transforms1 = T.Compose([
             T.ToTensor(),
             self.normalize
@@ -207,8 +207,8 @@ class LSDADataset(DeepfakeAbstractBaseDataset):
             img_lines = []
             step = 1
             for r1, r2 in data:
-                # collect a group with 1+len(fakes) videos, each video has self.frames[mode] frames。这里就是按同一个video这种顺序来存的，所以读的时候自然只要有了offset，就能对应的取了
-                #此外，这里面存的压根就不是路径，而是规范化的内容。
+                                                                                                                                                   
+                                          
                 img_lines.extend(
                     (f'youtube/{r1}', i, 0, mode)
                     for i in range(0, config['frame_num'][mode], step)
@@ -231,7 +231,7 @@ class LSDADataset(DeepfakeAbstractBaseDataset):
                         for i in range(0, config['frame_num'][mode], step)
                     )
 
-        # 2*360 (groups) * 1+len(with_dataset) (videos in each group) * self.frames[mode] (frames in each video)
+                                                                                                                
         assert len(img_lines) == 2*len(data) * (1 + len(with_dataset)) * config['frame_num'][mode], "to match our custom sampler, the length should be 2*360*(1+len(with_dataset))*frames[mode]"
         self.img_lines.extend(img_lines)
 
@@ -248,45 +248,45 @@ class LSDADataset(DeepfakeAbstractBaseDataset):
 
     def load_image(self, name, idx):
         instance_type, video_name = name.split('/')
-        #其实并没有完全对应，而只是保证在同一video的目标时间区间内的一帧
+                                           
         all_frames = self.img_json[self.data_root.split(os.path.sep)[-1]][self.transfer_dict[instance_type]]['train']['c23'][video_name]['frames']
         img_path = all_frames[idx]
 
         return self.load_rgb(img_path)
 
     def __getitem__(self, index):
-        name, idx, label, mode = self.img_lines[index] #这个sampler的目的是不要取重复video的图。
-        label = int(label)  # specific fake label from 1-4
+        name, idx, label, mode = self.img_lines[index]                            
+        label = int(label)                                
 
-        #取img没什么好说的。然后在这里把规范化的img_lines转为实际路径。
+                                              
         try:
             img = self.load_image(name, idx)
         except Exception as e:
-            # 下面处理不太合适，取的不是预期的video_id/fake_method，影响后面的lsda。
-            # random_idx = random.randint(0, len(self.img_lines)-1)
-            # print(f'Error loading image {name} at index {idx} due to the loading error. Try another one at index {random_idx}')
-            # return self.__getitem__(random_idx)
+                                                             
+                                                                   
+                                                                                                                                 
+                                                 
 
-            #边界条件判断，取同video的。
+                             
             if idx==0:
                 new_index = index+1
             elif idx==31:
                 new_index = index-1
             else:
-                new_index = index + random.choice([-1,1]) # 通过随机防止死递归
+                new_index = index + random.choice([-1,1])            
             print(f'Error loading image {name} at index {idx} due to the loading error. Try another one at index {new_index}')
             return self.__getitem__(new_index)
 
             
         if self.mode != 'train':
             raise ValueError("Not implemented yet")
-        # do augmentation
-        img = np.asarray(img) # convert PIL to numpy
+                         
+        img = np.asarray(img)                       
 
         img = augmentation_methods2(image=img)['image']
-        img = Image.fromarray(np.array(img, dtype=np.uint8)) # covnert numpy to PIL
+        img = Image.fromarray(np.array(img, dtype=np.uint8))                       
 
-        # transform with PIL as input
+                                     
         img = self.transforms1(img)
 
         return (img, label)
@@ -300,38 +300,38 @@ class LSDADataset(DeepfakeAbstractBaseDataset):
 
     @staticmethod
     def collate_fn(batch):
-        # Unzip the batch into images and labels
+                                                
         images, labels = zip(*batch)
 
-        # images, labels = zip(batch['image'], batch['label'])
+                                                              
 
-        # image_list = []
+                         
 
-        # for i in range(len(images)//5):
+                                         
             
-        #     img = images[i*5:(i+1)*5]
+                                       
 
-        #     # do augmentation
-        #     imgs_aug = augmentation_methods2(image=np.asarray(img[0]), image1=np.asarray(img[1]), image2=np.asarray(img[2]), image3=np.asarray(img[3]), image4=np.asarray(img[4]))
-        #     for k in imgs_aug:
+                               
+                                                                                                                                                                                    
+                                
 
-        #         img_aug = Image.fromarray(np.array(imgs_aug[k], dtype=np.uint8)) # covnert numpy to PIL
+                                                                                                         
 
-        #     # transform with PIL as input
-        #         img_aug = transforms1(img_aug)
-        #         image_list.append(img_aug)
+                                           
+                                                
+                                            
 
-        # Stack the images and labels
-        images = torch.stack(images, dim=0)  # Shape: (batch_size, c, h, w)
+                                     
+        images = torch.stack(images, dim=0)                                
         labels = torch.tensor(labels, dtype=torch.long)
 
         bs, c, h, w = images.shape
 
-        # Assume videos_per_group is 5 in our case
+                                                  
         videos_per_group = 5
         num_groups = bs // videos_per_group
 
-        # Reshape to get the group dimension: (num_groups, videos_per_group, c, h, w)
+                                                                                     
         images_grouped = images.view(num_groups, videos_per_group, c, h, w)
         labels_grouped = labels.view(num_groups, videos_per_group)
 
@@ -340,10 +340,10 @@ class LSDADataset(DeepfakeAbstractBaseDataset):
             for i, group in enumerate(labels_grouped)
             if set(group.numpy().tolist()) == {0, 1, 2, 3, 4}
         ]
-            # elif set(group.numpy().tolist()) == {0, 1, 2, 3}:
-            #     valid_indices.append(i)
-            # elif set(group.numpy().tolist()) == {0, 1, 2, 3, 4, 5}:
-            #     valid_indices.append(i)
+                                                               
+                                         
+                                                                     
+                                         
         
         images_grouped = images_grouped[valid_indices]
         labels_grouped = labels_grouped[valid_indices]
@@ -351,15 +351,15 @@ class LSDADataset(DeepfakeAbstractBaseDataset):
         if not valid_indices:
             raise ValueError("No valid groups found in this batch.")
 
-        # # Shuffle the video order within each group
-        # for i in range(num_groups):
-        #     perm = torch.randperm(videos_per_group)
-        #     images_grouped[i] = images_grouped[i, perm]
-        #     labels_grouped[i] = labels_grouped[i, perm]
+                                                     
+                                     
+                                                     
+                                                         
+                                                         
 
-        # # Flatten back to original shape but with shuffled video order
-        # images_shuffled = images_grouped.view(num_groups, videos_per_group, c, h, w)
-        # labels_shuffled = labels_grouped.view(bs)
+                                                                        
+                                                                                      
+                                                   
 
         return {'image': images_grouped, 'label': labels_grouped, 'mask': None, 'landmark': None}
 
@@ -369,7 +369,7 @@ if __name__ == '__main__':
         config = yaml.safe_load(f)
     train_set = LSDADataset(config=config, mode='train')
     custom_sampler = CustomSampler(num_groups=2*360, n_frame_per_vid=config['frame_num']['train'], batch_size=config['train_batchSize'], videos_per_group=5)
-    train_data_loader = \
+    train_data_loader =\
         torch.utils.data.DataLoader(
             dataset=train_set,
             batch_size=config['train_batchSize'],

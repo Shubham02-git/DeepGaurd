@@ -4,13 +4,13 @@ from .abstract_loss_func import AbstractLossClass
 
 
 def mahalanobis_distance(values: torch.Tensor, mean: torch.Tensor, inv_covariance: torch.Tensor) -> torch.Tensor:
-    """Compute the batched mahalanobis distance.
-
-    values is a batch of feature vectors.
-    mean is either the mean of the distribution to compare, or a second
-    batch of feature vectors.
-    inv_covariance is the inverse covariance of the target distribution.
-    """
+\
+\
+\
+\
+\
+\
+       
     assert values.dim() == 2
     assert 1 <= mean.dim() <= 2
     assert inv_covariance.dim() == 2
@@ -18,10 +18,10 @@ def mahalanobis_distance(values: torch.Tensor, mean: torch.Tensor, inv_covarianc
     assert mean.shape[-1] == inv_covariance.shape[0]
     assert inv_covariance.shape[0] == inv_covariance.shape[1]
 
-    if mean.dim() == 1:  # Distribution mean.
+    if mean.dim() == 1:                      
         mean = mean.unsqueeze(0)
-    x_mu = values - mean  # batch x features
-    # Same as dist = x_mu.t() * inv_covariance * x_mu batch wise
+    x_mu = values - mean                    
+                                                                
     dist = torch.einsum("im,mn,in->i", x_mu, inv_covariance, x_mu)
 
     return dist.sqrt()
@@ -37,7 +37,7 @@ class PatchConsistencyLoss(AbstractLossClass):
 
     def forward(self, attention_map_real, attention_map_fake, feature_patch, real_feature_mean, real_inv_covariance,
                 fake_feature_mean, fake_inv_covariance, labels):
-        # calculate mahalanobis distance
+                                        
         B, H, W, C = feature_patch.size()
         dist_real = mahalanobis_distance(feature_patch.reshape(B * H * W, C), real_feature_mean.cuda(),
                                          real_inv_covariance.cuda())
@@ -46,7 +46,7 @@ class PatchConsistencyLoss(AbstractLossClass):
         fake_indices = torch.where(labels == 1.0)[0]
         index_map = torch.relu(dist_real - dist_fake).reshape((B, H, W))[fake_indices, :]
 
-        # loss for real samples
+                               
         if attention_map_real.shape[0] == 0:
             loss_real = 0
         else:

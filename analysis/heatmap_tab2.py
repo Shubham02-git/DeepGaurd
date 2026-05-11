@@ -4,15 +4,15 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
-# 创建一个新的颜色映射
+            
 cmap = sns.color_palette("Reds")
 cmap = ListedColormap([rgb + (0.6,) for rgb in cmap])
 
-# 定义行列标签
+        
 row_labels = ["FF-DF", "FF-F2F", "FF-FS", "FF-NT"]
 col_labels = ["FF-DF", "FF-F2F", "FF-FS", "FF-NT"]
 
-# 创建数据
+      
 data_CORE = np.array([
     [0.9946, 0.7284, 0.7008, 0.7568],
     [0.6803, 0.9871, 0.6364, 0.6828],
@@ -70,32 +70,32 @@ data_Xception = np.array([
 df_Xception = pd.DataFrame(data_Xception, index=row_labels, columns=col_labels)
 
 data_ResNet = np.array([
-    [0.9762,	0.6366,	0.7344,	0.6947],
-    [0.6011,	0.9620,	0.5829,	0.6559],
-    [0.6432,	0.5824,	0.9748,	0.5236],
-    [0.5798,	0.5620,	0.5229,	0.8456],
+    [0.9762, 0.6366, 0.7344, 0.6947],
+    [0.6011, 0.9620, 0.5829, 0.6559],
+    [0.6432, 0.5824, 0.9748, 0.5236],
+    [0.5798, 0.5620, 0.5229, 0.8456],
 ])
 df_ResNet = pd.DataFrame(data_ResNet, index=row_labels, columns=col_labels)
 
 data_F3Net = np.array([
-    [0.9762,	0.6366,	0.7344,	0.6947],
-    [0.6011,	0.9620,	0.5829,	0.6559],
-    [0.6432,	0.5824,	0.9748,	0.5236],
-    [0.5798,	0.5620,	0.5229,	0.8456],
+    [0.9762, 0.6366, 0.7344, 0.6947],
+    [0.6011, 0.9620, 0.5829, 0.6559],
+    [0.6432, 0.5824, 0.9748, 0.5236],
+    [0.5798, 0.5620, 0.5229, 0.8456],
 ])
 df_F3Net = pd.DataFrame(data_F3Net, index=row_labels, columns=col_labels)
 
 data_FFD = np.array([
-    [0.9953,	0.7548,	0.6686,	0.7803],
-    [0.7114,	0.9857,	0.6624,	0.6779],
-    [0.5380,	0.6072,	0.9924,	0.5548],
-    [0.6634,	0.5961,	0.5457,	0.9547],
+    [0.9953, 0.7548, 0.6686, 0.7803],
+    [0.7114, 0.9857, 0.6624, 0.6779],
+    [0.5380, 0.6072, 0.9924, 0.5548],
+    [0.6634, 0.5961, 0.5457, 0.9547],
 ])
 df_FFD = pd.DataFrame(data_FFD, index=row_labels, columns=col_labels)
 
-# 使用subplot绘制多个热力图
+                  
 fig, axs = plt.subplots(1, 10, figsize=(55, 5))
-# 设置每个子图中x和y轴标签的字体大小
+                    
 tick_fontsize = 15
 
 vmin = min(np.min(data_CORE), np.min(data_EfficientB4), np.min(data_DSP_FWA), np.min(data_SPSL), np.min(data_SRM), np.min(data_Xception), np.min(data_F3Net), np.min(data_FFD), np.min(data_ResNet), np.min(data_FaceXray))

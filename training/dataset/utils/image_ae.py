@@ -26,9 +26,9 @@ class UnflattenLayer(nn.Module):
         return x.view(x.size(0), -1, self.width, self.width)
 
 class VAE_Encoder(nn.Module):
-    ''' 
-    VAE_Encoder: Encode image into std and logvar 
-    '''
+\
+\
+       
 
     def __init__(self, latent_dim=256):
         super(VAE_Encoder, self).__init__()
@@ -64,9 +64,9 @@ class VAE_Encoder(nn.Module):
 
 
 class VAE_Decoder(nn.Module):
-    ''' 
-    VAE_Decoder: Decode noise to image
-    '''
+\
+\
+       
 
     def __init__(self, latent_dim, output_dim=3):
         super(VAE_Decoder, self).__init__()        
@@ -97,7 +97,7 @@ class VAE_Decoder(nn.Module):
         return self.convs(z)
 
 class ImageAE(nn.Module):
-    # VAE architecture
+                      
     def __init__(self):
         super(ImageAE, self).__init__()
         latent_dim = 512
@@ -122,7 +122,7 @@ def get_pretraiend_ae(enc_path='pretrained/ae/vae/enc.pth', dec_path='pretrained
     ae.eval()
     return ae
 
-# from networks.pix2pix_network import UnetGenerator
+                                                    
 def get_pretraiend_unet(path='pretrained/ae/unet/ckpt_srm.pth'):
     unet = UnetGenerator(3, 3, 8)
     unet.load_state_dict(torch.load(path, map_location='cpu'))

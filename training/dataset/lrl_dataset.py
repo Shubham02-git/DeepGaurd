@@ -52,7 +52,7 @@ class LRLDataset(DeepfakeAbstractBaseDataset):
         img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         img_gray = np.float32(img_gray)
         img_dct = cv2.dct(img_gray)
-        # img_dct = np.log(np.abs(img_dct)+1e-6)
+                                                
 
         low_mask, mid_mask, high_mask = self.multi_pass_filter(img_dct, r1=0.33, r2=0.33)
         img_dct_filterd = high_mask * img_dct
@@ -64,11 +64,11 @@ class LRLDataset(DeepfakeAbstractBaseDataset):
         image_trans, label, landmark_tensors, mask_trans = super().__getitem__(index, no_norm=True)
 
         img_idct = self.image2dct(image_trans)
-        # normalize idct
+                        
         img_idct = (img_idct / 255 - 0.5) / 0.5
-        # img_idct = img_idct[np.newaxis, ...]
+                                              
 
-        # To tensor and normalize for fake and real images
+                                                          
         image_trans = self.normalize(self.to_tensor(image_trans))
         img_idct_trans = self.to_tensor(img_idct)
         mask_trans = torch.from_numpy(mask_trans)
@@ -82,19 +82,19 @@ class LRLDataset(DeepfakeAbstractBaseDataset):
 
     @staticmethod
     def collate_fn(batch):
-        """
-        Collate a batch of data points.
-
-        Args:
-            batch (list): A list of tuples containing the image tensor and label tensor.
-
-        Returns:
-            A tuple containing the image tensor, the label tensor, the landmark tensor,
-            and the mask tensor.
-        """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+           
         global c
         images, labels, img_idct_trans, masks = zip(*batch)
-        # Stack the image, label, landmark, and mask tensors
+                                                            
         images = torch.stack(images, dim=0)
         labels = torch.LongTensor(labels)
         masks = torch.stack(masks, dim=0)
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     config['dataset_json_folder'] = 'preprocessing/dataset_json_v3'
     config.update(config2)
     train_set = LRLDataset(config=config, mode='train')
-    train_data_loader = \
+    train_data_loader =\
         torch.utils.data.DataLoader(
             dataset=train_set,
             batch_size=4,

@@ -47,12 +47,12 @@ class IIDDetector(AbstractDetector):
         self.IIE_LOSS.train().cuda()
         
     def build_backbone(self, config):
-        # prepare the backbone
+                              
         backbone_class = BACKBONE[config['backbone_name']]
         model_config = config['backbone_config']
         backbone = backbone_class(model_config)
         if config['pretrained'] != 'None':
-            # if donot load the pretrained weights, fail to get good results
+                                                                            
             state_dict = torch.load(config['pretrained'])
             for name, weights in state_dict.items():
                 if 'pointwise' in name:
@@ -65,7 +65,7 @@ class IIDDetector(AbstractDetector):
         return backbone
     
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         if config['loss_func']=='center_loss':
             loss_func = loss_class(num_classes=2, feat_dim=2048)
@@ -74,7 +74,7 @@ class IIDDetector(AbstractDetector):
         return loss_func
     
     def features(self, data_dict: dict) -> torch.Tensor:
-        return self.backbone.features(data_dict['image']) #32,3,256,256
+        return self.backbone.features(data_dict['image'])              
 
     def classifier(self, features: torch.Tensor, id_f=None) -> torch.Tensor:
         return self.backbone.classifier(features,id_f)
@@ -97,7 +97,7 @@ class IIDDetector(AbstractDetector):
         loss_ce = self.BCE_LOSS(pred, label, return_logits=True).mean()
         loss += loss_ce
         loss_id, _, _ = self.IIE_LOSS(embed, id_index, return_logits=True)
-        # loss_id = 0
+                     
         loss += 0.05 * loss_id
         loss += 0.1 * loss_eic
 
@@ -120,14 +120,14 @@ class IIDDetector(AbstractDetector):
             dim=1).mean()
         loss_ce = self.BCE_LOSS(pred, label, return_logits=True).mean()
         loss += loss_ce
-        # loss_id = 0
+                     
         loss += 0.1 * loss_eic
 
         loss_dict = {'overall': loss,'loss_bce': loss_ce, 'loss_iie': 0, 'loss_eic': loss_eic}
         return loss_dict
 
     def get_losses(self, data_dict: dict, pred_dict: dict) -> dict:
-        if 'id_index' in data_dict: # depend on the dataset for io
+        if 'id_index' in data_dict:                               
             return self.get_train_loss(data_dict,pred_dict)
         else:
             return self.get_test_loss(data_dict, pred_dict)
@@ -135,7 +135,7 @@ class IIDDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         metric_batch_dict = {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
         return metric_batch_dict
@@ -143,22 +143,22 @@ class IIDDetector(AbstractDetector):
     def forward(self, data_dict: dict, inference=False) -> dict:
         resized_images = F.interpolate(data_dict['image'], size=(112, 112), mode='bilinear', align_corners=False)
         id_feat = self.explicit_extractor(resized_images)
-        # get the features by backbone
+                                      
         features = self.features(data_dict)
-        # get the prediction by classifier
+                                          
         pred = self.classifier(features,id_feat)
 
         embed=self.backbone.last_emb
-        # get the probability of the pred
+                                         
         prob = torch.softmax(pred, dim=1)[:, 1]
 
-        # build the prediction dict for each output
+                                                   
         pred_dict = {'cls': pred, 'prob': prob, 'feat': features,'id_feat': id_feat,'embed':embed}
         return pred_dict
 
 if __name__ == '__main__':
 
-    # Load config file (update path as needed for your setup)
+                                                             
     config_path = r'training/config/detector/iid_detector.yaml'
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     config['ddp']=False
     detector=IIDDetector(config=config).cuda()
     train_set = IIDDataset(config=config, mode='train')
-    train_data_loader = \
+    train_data_loader =\
         torch.utils.data.DataLoader(
             dataset=train_set,
             batch_size=4,

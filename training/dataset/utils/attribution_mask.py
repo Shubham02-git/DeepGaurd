@@ -17,7 +17,7 @@ def remove_mouth(image, landmarks):
     return line
 
 def remove_eyes(image, landmarks, opt='b'):
-    ##l: left eye; r: right eye, b: both eye
+                                            
     if opt == 'l':
         (x1, y1), (x2, y2) = landmarks[36],landmarks[39]
     elif opt == 'r':
@@ -36,7 +36,7 @@ def remove_eyes(image, landmarks, opt='b'):
     return line
 
 def remove_nose(image, landmarks):
-    ##l: left eye; r: right eye, b: both eye
+                                            
 
     (x1, y1), (x2, y2) = landmarks[27], landmarks[30]
     mask = np.zeros_like(image[..., 0])

@@ -1,14 +1,14 @@
-'''
-# ------------------------------------------------------------------------------
-# Copyright (c) Microsoft
-# Licensed under the MIT License.
-# Written by Bin Xiao (Bin.Xiao@microsoft.com)
-# Modified by Ke Sun (sunk@mail.ustc.edu.cn)
-# ------------------------------------------------------------------------------
-
-The code is mainly modified from the below link:
-https://github.com/HRNet/HRNet-Image-Classification/tree/master
-'''
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+   
 
 from __future__ import absolute_import
 from __future__ import division
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 def conv3x3(in_planes, out_planes, stride=1):
-    """3x3 convolution with padding"""
+                                      
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
 
@@ -150,7 +150,7 @@ class HighResolutionModule(nn.Module):
     def _make_one_branch(self, branch_index, block, num_blocks, num_channels,
                          stride=1):
         downsample = None
-        if stride != 1 or \
+        if stride != 1 or\
            self.num_inchannels[branch_index] != num_channels[branch_index] * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv2d(self.num_inchannels[branch_index],
@@ -163,7 +163,7 @@ class HighResolutionModule(nn.Module):
         layers = []
         layers.append(block(self.num_inchannels[branch_index],
                             num_channels[branch_index], stride, downsample))
-        self.num_inchannels[branch_index] = \
+        self.num_inchannels[branch_index] =\
             num_channels[branch_index] * block.expansion
         for i in range(1, num_blocks[branch_index]):
             layers.append(block(self.num_inchannels[branch_index],
@@ -307,8 +307,8 @@ class HighResolutionNet(nn.Module):
         self.stage4, pre_stage_channels = self._make_stage(
             self.stage4_cfg, num_channels, multi_scale_output=True)
 
-        # Classification Head
-        self.incre_modules, self.downsamp_modules, \
+                             
+        self.incre_modules, self.downsamp_modules,\
             self.final_layer = self._make_head(pre_stage_channels)
 
         self.fc = nn.Linear(2048, 1000)
@@ -318,8 +318,8 @@ class HighResolutionNet(nn.Module):
         head_block = Bottleneck
         head_channels = [32, 64, 128, 256]
 
-        # Increasing the #channels on each resolution 
-        # from C, 2C, 4C, 8C to 128, 256, 512, 1024
+                                                      
+                                                   
         incre_modules = []
         for i, channels  in enumerate(pre_stage_channels):
             incre_module = self._make_layer(head_block,
@@ -330,7 +330,7 @@ class HighResolutionNet(nn.Module):
             incre_modules.append(incre_module)
         incre_modules = nn.ModuleList(incre_modules)
             
-        # downsampling modules
+                              
         downsamp_modules = []
         for i in range(len(pre_stage_channels)-1):
             in_channels = head_channels[i] * head_block.expansion
@@ -388,7 +388,7 @@ class HighResolutionNet(nn.Module):
                 conv3x3s = []
                 for j in range(i+1-num_branches_pre):
                     inchannels = num_channels_pre_layer[-1]
-                    outchannels = num_channels_cur_layer[i] \
+                    outchannels = num_channels_cur_layer[i]\
                         if j == i-num_branches_pre else inchannels
                     conv3x3s.append(nn.Sequential(
                         nn.Conv2d(
@@ -427,7 +427,7 @@ class HighResolutionNet(nn.Module):
 
         modules = []
         for i in range(num_modules):
-            # multi_scale_output is only used last module
+                                                         
             if not multi_scale_output and i == num_modules - 1:
                 reset_multi_scale_output = False
             else:
@@ -479,10 +479,10 @@ class HighResolutionNet(nn.Module):
                 x_list.append(y_list[i])
         y_list = self.stage4(x_list)
 
-        # Classification Head
+                             
         y = self.incre_modules[0](y_list[0])
         for i in range(len(self.downsamp_modules)):
-            y = self.incre_modules[i+1](y_list[i+1]) + \
+            y = self.incre_modules[i+1](y_list[i+1]) +\
                         self.downsamp_modules[i](y)
 
         y = self.final_layer(y)
@@ -530,7 +530,7 @@ class HighResolutionNet(nn.Module):
                 x_list.append(y_list[i])
         y_list = self.stage4(x_list)
 
-        # Upsampling
+                    
         x0, x1, x2, x3 = y_list
         x0_h, x0_w = x0.size(2), x0.size(3)
         x1 = F.upsample(x1, size=(x0_h, x0_w), mode='bilinear')
@@ -539,15 +539,15 @@ class HighResolutionNet(nn.Module):
 
         x_out = torch.cat([x0, x1, x2, x3], 1)
 
-        #print(x_out.size())
+                            
 
         return x_out  
 
     def classifier(self, x):
-        # Classification Head
+                             
         y = self.incre_modules[0](x[0])
         for i in range(len(self.downsamp_modules)):
-            y = self.incre_modules[i+1](x[i+1]) + \
+            y = self.incre_modules[i+1](x[i+1]) +\
                         self.downsamp_modules[i](y)
 
         y = self.final_layer(y)

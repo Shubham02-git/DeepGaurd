@@ -1,5 +1,5 @@
-# The code is mainly modified from GitHub link below:
-# https://github.com/ondyari/FaceForensics/blob/master/classification/network/xception.py
+                                                     
+                                                                                         
 
 import os
 import argparse
@@ -7,7 +7,7 @@ import logging
 
 import math
 import torch
-# import pretrainedmodels
+                         
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -50,7 +50,7 @@ class Block(nn.Module):
         rep = []
 
         filters = in_filters
-        if grow_first:   # whether the number of filters grows first
+        if grow_first:                                              
             rep.append(self.relu)
             rep.append(SeparableConv2d(in_filters, out_filters,
                                        3, stride=1, padding=1, bias=False))
@@ -97,23 +97,23 @@ def add_gaussian_noise(ins, mean=0, stddev=0.2):
 
 @BACKBONE.register_module(module_name="xception")
 class Xception(nn.Module):
-    """
-    Xception optimized for the ImageNet dataset, as specified in
-    https://arxiv.org/pdf/1610.02357.pdf
-    """
+\
+\
+\
+       
 
     def __init__(self, xception_config):
-        """ Constructor
-        Args:
-            xception_config: configuration file with the dict format
-        """
+\
+\
+\
+           
         super(Xception, self).__init__()
         self.num_classes = xception_config["num_classes"]
         self.mode = xception_config["mode"]
         inc = xception_config["inc"]
         dropout = xception_config["dropout"]
 
-        # Entry flow
+                    
         self.conv1 = nn.Conv2d(inc, 32, 3, 2, 0, bias=False)
         
         self.bn1 = nn.BatchNorm2d(32)
@@ -121,7 +121,7 @@ class Xception(nn.Module):
 
         self.conv2 = nn.Conv2d(32, 64, 3, bias=False)
         self.bn2 = nn.BatchNorm2d(64)
-        # do relu here
+                      
 
         self.block1 = Block(
             64, 128, 2, 2, start_with_relu=False, grow_first=True)
@@ -130,7 +130,7 @@ class Xception(nn.Module):
         self.block3 = Block(
             256, 728, 2, 2, start_with_relu=True, grow_first=True)
 
-        # middle flow
+                     
         self.block4 = Block(
             728, 728, 3, 1, start_with_relu=True, grow_first=True)
         self.block5 = Block(
@@ -149,17 +149,17 @@ class Xception(nn.Module):
         self.block11 = Block(
             728, 728, 3, 1, start_with_relu=True, grow_first=True)
 
-        # Exit flow
+                   
         self.block12 = Block(
             728, 1024, 2, 2, start_with_relu=True, grow_first=False)
 
         self.conv3 = SeparableConv2d(1024, 1536, 3, 1, 1)
         self.bn3 = nn.BatchNorm2d(1536)
 
-        # do relu here
+                      
         self.conv4 = SeparableConv2d(1536, 2048, 3, 1, 1)
         self.bn4 = nn.BatchNorm2d(2048)
-        # used for iid
+                      
         final_channel = 2048
         if self.mode == 'adjust_channel_iid':
             final_channel = 512
@@ -256,7 +256,7 @@ class Xception(nn.Module):
         return x
 
     def classifier(self, features,id_feat=None):
-        # for iid
+                 
         if self.mode == 'adjust_channel':
             x = features
         else:
@@ -266,7 +266,7 @@ class Xception(nn.Module):
             x = F.adaptive_avg_pool2d(x, (1, 1))
             x = x.view(x.size(0), -1)
         self.last_emb = x
-        # for iid
+                 
         if id_feat!=None:
             out = self.last_linear(x-id_feat)
         else:

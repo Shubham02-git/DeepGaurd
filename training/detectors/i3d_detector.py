@@ -40,19 +40,19 @@ class I3DDetector(AbstractDetector):
             print(f"loading pretrained model from {config['pretrained']}")
             pretrained_weights = torch.load(config['pretrained'], map_location='cpu', encoding='latin1')
             modified_weights = {k.replace("resnet.", ""): v for k, v in pretrained_weights.items()}
-            # fit from 400 num_classes to 1
+                                           
             modified_weights["head.projection.weight"] = modified_weights["head.projection.weight"][:1, :]
             modified_weights["head.projection.bias"] = modified_weights["head.projection.bias"][:1]
-            # load final ckpt
+                             
             self.resnet.load_state_dict(modified_weights, strict=True)
 
-        self.loss_func = nn.BCELoss()  # The output of the model is a probability value between 0 and 1 (haved used sigmoid)
+        self.loss_func = nn.BCELoss()                                                                                       
 
     def build_backbone(self, config):
         pass
 
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         loss_func = loss_class()
         return loss_func

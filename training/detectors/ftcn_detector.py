@@ -58,10 +58,10 @@ class FTCNDetector(AbstractDetector):
             print(f"loading pretrained model from {config['pretrained']}")
             pretrained_weights = torch.load(config['pretrained'], map_location='cpu', encoding='latin1')
             modified_weights = {k.replace("resnet.", ""): v for k, v in pretrained_weights.items()}
-            # fit from 400 num_classes to 1
+                                           
             modified_weights["head.projection.weight"] = modified_weights["head.projection.weight"][:1, :]
             modified_weights["head.projection.bias"] = modified_weights["head.projection.bias"][:1]
-            # load final ckpt
+                             
             self.resnet.load_state_dict(modified_weights, strict=True)
         
 
@@ -83,13 +83,13 @@ class FTCNDetector(AbstractDetector):
 
         self.resnet.head = TransformerHead(**params)
 
-        self.loss_func = nn.BCELoss()  # The output of the model is a probability value between 0 and 1 (haved used sigmoid)
+        self.loss_func = nn.BCELoss()                                                                                       
     
     def build_backbone(self, config):
         pass
     
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         return loss_class()
     
@@ -111,14 +111,14 @@ class FTCNDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         return {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
 
     def forward(self, data_dict: dict, inference=False) -> dict:
-        # get the features and probability
+                                          
         prob, features = self.features(data_dict)
-        # build the prediction dict for each output
+                                                   
         return {'cls': prob, 'prob': prob, 'feat': features}
 
 
@@ -129,7 +129,7 @@ class RandomPatchPool(nn.Module):
         super().__init__()
 
     def forward(self, x):
-        # batch,channel,16,7x7
+                              
         b, c, t, h, w = x.shape
         x = x.reshape(b, c, t, h * w)
         if self.training and random_select:
@@ -158,7 +158,7 @@ class RandomAvgPool(nn.Module):
         super().__init__()
 
     def forward(self, x):
-        # batch,channel,16,7x7
+                              
         b, c, t, h, w = x.shape
         x = x.reshape(b, c, t, h * w)
         candidates = list(range(h * w))
@@ -172,8 +172,8 @@ class RandomAvgPool(nn.Module):
 class TransformerHead(nn.Module):
     def __init__(self, spatial_size=7, time_size=16, in_channels=2048):
         super().__init__()
-        # if no_time_pool:
-        #     time_size = time_size * 2
+                          
+                                       
         patch_type = "time"
         if patch_type == "time":
             self.pool = nn.AvgPool3d((1, spatial_size, spatial_size))
@@ -242,12 +242,12 @@ print(f"spatial_count={spatial_count} keep_stride_count={keep_stride_count}")
 
 
 def temporal_only_conv(module, name, removed, stride_removed=0):
-    """
-    Recursively put desired batch norm in nn.module module.
-
-    set module = net to start code.
-    """
-    # go through all attributes of module nn.module (e.g. network or layer) and put batch norms if present
+\
+\
+\
+\
+       
+                                                                                                          
     for attr_str in dir(module):
         sub_module = getattr(module, attr_str)
         if type(sub_module) == nn.Conv3d:
@@ -272,7 +272,7 @@ def temporal_only_conv(module, name, removed, stride_removed=0):
             kernel_size[1] = kernel_size[2] = target_spatial_size
             padding[1] = padding[2] = predefine_padding[target_spatial_size]
 
-            # param_dict = {key: getattr(sub_module, key) for key in parameters }
+                                                                                 
             param_dict = {key: getattr(sub_module, key) for key in parameters if key not in ['device', 'dtype']}
 
             param_dict.update(kernel_size=kernel_size, padding=padding, stride=stride)
@@ -301,7 +301,7 @@ def temporal_only_conv(module, name, removed, stride_removed=0):
                 print("keep spatial")
         elif type(sub_module) == nn.Dropout:
             new_module = nn.Dropout(p=0.5)
-            # print(f"replace {name}.{attr_str}: {str(sub_module)} with {str(new_module)}")
+                                                                                           
             setattr(module, attr_str, new_module)
         if no_time_pool:
             if type(sub_module) == nn.MaxPool3d:
@@ -314,7 +314,7 @@ def temporal_only_conv(module, name, removed, stride_removed=0):
                 kernel_size[0] = 2 * kernel_size[0]
                 setattr(module, attr_str, nn.AvgPool3d(kernel_size))
 
-    # iterate through immediate child modules. Note, the recursion is done by our code no need to use named_modules()
+                                                                                                                     
     old_name = name
     for name, immediate_child_module in module.named_children():
         removed, stride_removed = temporal_only_conv(
@@ -323,58 +323,58 @@ def temporal_only_conv(module, name, removed, stride_removed=0):
     return removed, stride_removed
 
 
-# class I3D8x8(nn.Module):
-#     def __init__(self, pretrained_path=None) -> None:
-#         super(I3D8x8, self).__init__()
-#         cfg = get_cfg()
-#         cfg.merge_from_str(config_text)
-#         cfg.NUM_GPUS = 1
-#         cfg.TEST.BATCH_SIZE = 1
-#         cfg.TRAIN.BATCH_SIZE = 1
-#         cfg.DATA.NUM_FRAMES = 16
-#         self.resnet = ResNetOri(cfg)
-#         temporal_only_conv(self.resnet, "model", 0)
+                          
+                                                       
+                                        
+                         
+                                         
+                          
+                                 
+                                  
+                                  
+                                      
+                                                     
 
-#         stop_point = 5
+                        
 
-#         for i in [5, 4, 3]:
-#             if stop_point <= i:
-#                 setattr(self.resnet, f"s{i}", nn.Identity())
-#                 if stop_point==3:
-#                     setattr(self.resnet, f"pathway0_pool", nn.Identity())
+                             
+                                 
+                                                              
+                                   
+                                                                           
         
-#         params = {
-#             6: dict(spatial_size=7, time_size=16, in_channels=2048),
-#             5: dict(spatial_size=14, time_size=16, in_channels=1024),
-#             4: dict(spatial_size=28, time_size=16, in_channels=512),
-#             3: dict(spatial_size=56, time_size=32, in_channels=256),
-#         }[stop_point]
+                    
+                                                                      
+                                                                       
+                                                                      
+                                                                      
+                       
 
-#         self.resnet.head = TransformerHead(**params)
+                                                      
 
-#         if pretrained_path is not None:
-#             print(f"loading pretrained model from {pretrained_path}")
-#             pretrained_weights = torch.load(pretrained_path)
-#             modified_weights = {k.replace("resnet.", ""): v for k, v in pretrained_weights.items()}
-#             self.resnet.load_state_dict(modified_weights, strict=True)
+                                         
+                                                                       
+                                                              
+                                                                                                     
+                                                                        
 
-#     def forward(
-#         self,
-#         images,
-#         noise=None,
-#         has_mask=None,
-#         freeze_backbone=False,
-#         return_feature_maps=False,
-#     ):
-#         assert not freeze_backbone
-#         inputs = [images]
-#         pred = self.resnet(inputs)
-#         output = {}
-#         output["final_output"] = pred
-#         return output
+                  
+               
+                 
+                     
+                        
+                                
+                                    
+        
+                                    
+                           
+                                    
+                     
+                                       
+                       
 
 
-# if __name__ == '__main__':
-#     model = I3D8x8()
-#     inp = torch.randn(1, 3, 16, 224, 224)
-#     out = model(inp)
+                            
+                      
+                                           
+                      

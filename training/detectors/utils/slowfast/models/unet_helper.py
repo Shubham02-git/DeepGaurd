@@ -100,7 +100,7 @@ def freeze_net(model: nn.Module, freeze_prefixs):
             if param.requires_grad is True:
                 param.requires_grad = False
             flag = True
-            # print("freeze",name)
+                                  
 
     assert flag
 

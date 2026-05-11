@@ -31,9 +31,9 @@ def get_test_metrics(y_pred, y_true, img_names):
         result_dict = {}
         new_label = []
         new_pred = []
-        # print(image[0])
-        # print(pred.shape)
-        # print(label.shape)
+                         
+                           
+                            
         for item in np.transpose(np.stack((image, pred, label)), (1, 0)):
 
             s = item[0]
@@ -69,29 +69,29 @@ def get_test_metrics(y_pred, y_true, img_names):
 
 
     y_pred = y_pred.squeeze()
-    # For UCF, where labels for different manipulations are not consistent.
+                                                                           
     y_true[y_true >= 1] = 1
-    # auc
+         
     fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred, pos_label=1)
     auc = metrics.auc(fpr, tpr)
-    # eer
+         
     fnr = 1 - tpr
     try:
         eer_idx = np.nanargmin(np.absolute((fnr - fpr)))
         eer = 0.0 if np.isnan(fpr[eer_idx]) else fpr[eer_idx]
     except (ValueError, IndexError):
         eer = 0.0
-    # ap
+        
     ap = metrics.average_precision_score(y_true, y_pred)
-    # acc
+         
     prediction_class = (y_pred > 0.5).astype(int)
     correct = (prediction_class == np.clip(y_true, a_min=0, a_max=1)).sum().item()
     acc = correct / len(prediction_class)
     if type(img_names[0]) is not list:
-        # calculate video-level auc for the frame-level methods.
+                                                                
         v_auc, _ = get_video_metrics(img_names, y_pred, y_true)
     else:
-        # video-level methods
+                             
         v_auc=auc
 
     return {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap, 'pred': y_pred, 'video_auc': v_auc, 'label': y_true}

@@ -29,7 +29,7 @@ class FaceXrayDetector(AbstractDetector):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        # build model
+                     
         self.backbone = self.build_backbone(config)
         self.post_process = nn.Sequential(
             nn.Conv2d(in_channels=720, out_channels=256, kernel_size=3, stride=1, padding=1),
@@ -55,7 +55,7 @@ class FaceXrayDetector(AbstractDetector):
     
     def build_backbone(self, config):
         cfg_path = './training/config/backbone/cls_hrnet_w48.yaml'
-        # parse options and load config
+                                       
         with open(cfg_path, 'r') as f:
             cfg_config = yaml.safe_load(f)
         convnet = get_cls_net(cfg_config)
@@ -75,45 +75,45 @@ class FaceXrayDetector(AbstractDetector):
         return self.backbone.features(data_dict['image'])
 
     def classifier(self, features: list) -> torch.tensor:
-        # mask
+              
         mask = self.post_process(features)
-        # feat
+              
         feat = F.adaptive_avg_pool2d(mask, 128).view(mask.size(0), -1)
-        # cls
+             
         score = self.fc(feat)
         return feat, score, mask
 
     def get_losses(self, data_dict: dict, pred_dict: dict) -> dict:
-        # label
+               
         label = data_dict['label']
         mask_gt = data_dict['mask']
-        # pred
+              
         pred_cls = pred_dict['cls']
         pred_mask = pred_dict['mask_pred'] if data_dict['mask'] is not None else None
-        # loss
+              
         loss_cls = self.loss_func['cls'](pred_cls, label)
         if data_dict['mask'] is not None:
-            # Move tensors to the same device
+                                             
             mask_gt = mask_gt.to(pred_mask.device)
             loss_mask = F.mse_loss(pred_mask.squeeze().float(), mask_gt.squeeze().float())
-            # follow the original paper,
-            # FIXME: we set λ = 1000 to force the network focusing more on learning the face X-ray prediction
+                                        
+                                                                                                             
             loss = loss_cls + 1000. * loss_mask
             return {'overall': loss, 'mask': loss_mask, 'cls': loss_cls}
-        # mask_gt is none (during the testing or inference)
+                                                           
         return {'overall': loss_cls, 'cls': loss_cls}
     
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         return {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
 
     def forward(self, data_dict: dict, inference=False) -> dict:
         features = self.features(data_dict)
         features, pred, mask_pred = self.classifier(features)
-        # get the probability of the pred
+                                         
         prob = torch.softmax(pred, dim=1)[:, 1]
         return {'cls': pred, 'prob': prob, 'feat': features, 'mask_pred': mask_pred}
 

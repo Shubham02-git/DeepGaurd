@@ -33,8 +33,8 @@ class StACLIPDetector(AbstractDetector):
 
     def build_backbone(self, config):
         assert self.config['resolution'] == 224, 'The resolution of the input image should be 224x224'
-        # assert self.config['clip_size'] == 8, 'The number of frames should be 8'
-        # prepare the backbone
+                                                                                  
+                              
         backbone = ViT_CLIP(
             input_resolution=224,
             num_frames=self.config['clip_size'],
@@ -48,20 +48,20 @@ class StACLIPDetector(AbstractDetector):
             pretrained=True
         )
 
-        # ## freeze some parameters
-        # for name, param in backbone.named_parameters():
-        #     if 'temporal_embedding' not in name and 'ln_post' not in name and 'cls_head' not in name and 'Adapter' not in name:
-        #         param.requires_grad = False
+                                   
+                                                         
+                                                                                                                                 
+                                             
 
-        # for name, param in backbone.named_parameters():
-        #     print('{}: {}'.format(name, param.requires_grad))
-        # num_param = sum(p.numel() for p in backbone.parameters() if p.requires_grad)
-        # num_total_param = sum(p.numel() for p in backbone.parameters())
-        # print('Number of total parameters: {}, tunable parameters: {}'.format(num_total_param, num_param))
+                                                         
+                                                               
+                                                                                      
+                                                                         
+                                                                                                            
         return backbone
 
     def build_loss(self, config):
-        # prepare the loss function
+                                   
         loss_class = LOSSFUNC[config['loss_func']]
         loss_func = loss_class()
         return loss_func
@@ -82,35 +82,35 @@ class StACLIPDetector(AbstractDetector):
     def get_train_metrics(self, data_dict: dict, pred_dict: dict) -> dict:
         label = data_dict['label']
         pred = pred_dict['cls']
-        # compute metrics for batch data
+                                        
         auc, eer, acc, ap = calculate_metrics_for_train(label.detach(), pred.detach())
         metric_batch_dict = {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap}
         return metric_batch_dict
 
     def get_test_metrics(self):
         y_pred, y_true = self.video_calculation(self.video_names, self.prob, self.label)
-        # auc
+             
         fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred, pos_label=1)
         auc = metrics.auc(fpr, tpr)
-        # eer
+             
         fnr = 1 - tpr
         eer = fpr[np.nanargmin(np.absolute((fnr - fpr)))]
-        # ap
+            
         ap = metrics.average_precision_score(y_true, y_pred)
-        # acc
+             
         acc = self.correct / self.total
-        # reset the prob and label
+                                  
 
         return {'acc': acc, 'auc': auc, 'eer': eer, 'ap': ap, 'pred': y_pred, 'label': y_true}
 
     def forward(self, data_dict: dict, inference=False) -> dict:
-        # get the features by backbone
+                                      
         features = self.features(data_dict)
-        # get the prediction by classifier
+                                          
         pred = self.classifier(features)
-        # get the probability of the pred
+                                         
         prob = torch.softmax(pred, dim=1)[:, 1]
-        # build the prediction dict for each output
+                                                   
         pred_dict = {'cls': pred, 'prob': prob, 'feat': features}
 
         return pred_dict
@@ -126,7 +126,7 @@ class Adapter(nn.Module):
         self.D_fc2 = nn.Linear(D_hidden_features, D_features)
 
     def forward(self, x):
-        # x is (BT, HW+1, D)
+                            
         xs = self.D_fc1(x)
         xs = self.act(xs)
         xs = self.D_fc2(xs)
@@ -138,7 +138,7 @@ class Adapter(nn.Module):
 
 
 class LayerNorm(nn.LayerNorm):
-    """Subclass torch's LayerNorm to handle fp16."""
+                                                    
 
     def forward(self, x: torch.Tensor):
         orig_type = x.dtype
@@ -197,56 +197,56 @@ class DepthwiseConv3D(nn.Module):
         return x
 
 
-# class ViT_Adapter(nn.Module):
-#     def __init__(self, num_frames=8, in_channels=1024, out_channels=1024):
-#         super().__init__()
-#         self.num_frames=num_frames
-#         self.in_channels = in_channels
-#         self.out_channels = out_channels
-#         self.adapter_channels = int(1024 * 0.5)
+                               
+                                                                            
+                            
+                                    
+                                        
+                                          
+                                                 
 
-#         self.down = nn.Linear(in_features=self.in_channels, out_features=self.adapter_channels)
-#         self.gelu1 = nn.GELU()
+                                                                                                 
+                                
 
-#         self.s_conv = DepthwiseConv3D(in_channels=self.adapter_channels, kernel_size=(1, 3, 3))
-#         self.t_conv = DepthwiseConv3D(in_channels=self.adapter_channels, kernel_size=(3, 1, 1))
+                                                                                                 
+                                                                                                 
 
-#         self.gelu = nn.GELU()
+                               
 
-#         self.up = nn.Linear(in_features=self.adapter_channels, out_features=self.out_channels)
-#         self.gelu2 = nn.GELU()
+                                                                                                
+                                
 
-#     def forward(self, x):
-#         # hw+1 bt c
-#         n, bt, c = x.shape
-#         H = round(math.sqrt(n - 1))
-#         x_in = x
+                           
+                     
+                            
+                                     
+                  
 
-#         x = self.down(x)
-#         x = self.gelu1(x)
+                          
+                           
 
-#         cls = x[0, :, :].unsqueeze(0)
-#         x = x[1:, :, :]
+                                       
+                         
 
-#         x = rearrange(x, '(h w) (b t) c -> b c t h w', t=self.num_frames, h=H)
+                                                                                
 
-#         # Apply depthwise 3D convolutions
-#         xs = self.s_conv(x)
-#         xt = self.t_conv(x)
+                                           
+                             
+                             
 
-#         # Fusion of xs and xt
-#         x = (xs + xt) / 2
-#         x = self.gelu(x)
-#         x = rearrange(x, 'b c t h w -> (h w) (b t) c')
+                               
+                           
+                          
+                                                        
 
-#         x = torch.cat([cls, x], dim=0)
+                                        
 
-#         x = self.up(x)
-#         x = self.gelu2(x)
+                        
+                           
 
-#         # residual
-#         x += x_in
-#         return x
+                    
+                   
+                  
 
 
 class ViT_Adapter(nn.Module):
@@ -276,7 +276,7 @@ class ViT_Adapter(nn.Module):
         self.cross_attention = CrossAttention(embed_dim=self.adapter_channels, num_heads=2)
 
     def forward(self, x):
-        # hw+1 bt c
+                   
         n, bt, c = x.shape
         H = round(math.sqrt(n - 1))
         x_in = x
@@ -289,7 +289,7 @@ class ViT_Adapter(nn.Module):
 
         x = rearrange(x, '(h w) (b t) c -> b c t h w', t=self.num_frames, h=H)
 
-        # Apply depthwise 3D convolutions
+                                         
         xs1 = self.s_conv1(x)
         xs2 = self.s_conv2(x)
         xs3 = self.s_conv3(x)
@@ -298,11 +298,11 @@ class ViT_Adapter(nn.Module):
         xt2 = self.t_conv2(x)
         xt3 = self.t_conv3(x)
 
-        # Fusion of xs and xt with residual connections
+                                                       
         xs = (xs1 + xs2 + xs3) / 3 + x
         xt = (xt1 + xt2 + xt3) / 3 + x
 
-        # cross attention
+                         
         xs, xt = self.cross_attention(xs, xt)
 
         x = (xs + xt) / 2
@@ -314,7 +314,7 @@ class ViT_Adapter(nn.Module):
         x = self.up(x)
         x = self.gelu2(x)
 
-        # residual
+                  
         x += x_in
         return x
 
@@ -326,22 +326,22 @@ class CrossAttention(nn.Module):
         self.temporal_to_spatial = nn.MultiheadAttention(embed_dim, num_heads)
 
     def forward(self, spatial, temporal):
-        # B, C, T, H, W
+                       
         B, C, T, H, W = spatial.shape
 
-        # Flatten the spatial and temporal dimensions
-        spatial = spatial.view(B, C, T, H * W)  # [B, C, T, H*W]
-        temporal = temporal.view(B, C, T, H * W)  # [B, C, T, H*W]
+                                                     
+        spatial = spatial.view(B, C, T, H * W)                  
+        temporal = temporal.view(B, C, T, H * W)                  
 
-        # Permute to [T*H*W, B, C] for MultiheadAttention
-        spatial = spatial.permute(2, 0, 3, 1).reshape(T * H * W, B, C)  # [T*H*W, B, C]
-        temporal = temporal.permute(2, 0, 3, 1).reshape(T * H * W, B, C)  # [T*H*W, B, C]
+                                                         
+        spatial = spatial.permute(2, 0, 3, 1).reshape(T * H * W, B, C)                 
+        temporal = temporal.permute(2, 0, 3, 1).reshape(T * H * W, B, C)                 
 
-        # Apply cross attention
+                               
         s2t, _ = self.spatial_to_temporal(temporal, spatial, spatial)
         t2s, _ = self.temporal_to_spatial(spatial, temporal, temporal)
 
-        # Reshape back to original dimensions
+                                             
         s2t = s2t.view(T, H * W, B, C).permute(2, 3, 0, 1).reshape(B, C, T, H, W)
         t2s = t2s.view(T, H * W, B, C).permute(2, 3, 0, 1).reshape(B, C, T, H, W)
 
@@ -367,9 +367,9 @@ class ResidualAttentionBlock(nn.Module):
         return self.attn(x, x, x, need_weights=False)[0]
 
     def forward(self, x):
-        # x shape [HW+1, BT, C]
+                               
         x = x + self.attention(self.ln_1(x))
-        # x = self.Adapter(x)
+                             
         x = x + self.mlp(self.ln_2(x))
         x = self.Adapter(x)
         return x
@@ -389,7 +389,7 @@ class Transformer(nn.Module):
 
 
 class ViT_CLIP(nn.Module):
-    ## ViT definition in CLIP image encoder
+                                           
     def __init__(self, input_resolution: int, num_frames: int, patch_size: int, width: int, layers: int, heads: int,
                  drop_path_rate, num_tadapter=1, adapter_scale=0.5, pretrained=None):
         super().__init__()
@@ -411,11 +411,11 @@ class ViT_CLIP(nn.Module):
 
         self.ln_post = LayerNorm(width)
 
-        # self.init_weights()
+                             
 
     def init_weights(self):
         logger.info(f'load model from: {self.pretrained}')
-        # Load OpenAI CLIP pretrained weights
+                                             
         clip_model, preprocess = clip.load("ViT-L/14", device="cpu")
         pretrain_dict = clip_model.visual.state_dict()
         del clip_model
@@ -425,7 +425,7 @@ class ViT_CLIP(nn.Module):
         logger.info('Unexpected keys: {}'.format(msg.unexpected_keys))
         logger.info(f"=> loaded successfully '{self.pretrained}'")
         torch.cuda.empty_cache()
-        # zero-initialize Adapters
+                                  
         for n1, m1 in self.named_modules():
             if 'Adapter' in n1:
                 for n2, m2 in m1.named_modules():
@@ -456,7 +456,7 @@ class ViT_CLIP(nn.Module):
             [self.class_embedding.to(x.dtype) + torch.zeros(x.shape[0], 1, x.shape[-1], dtype=x.dtype, device=x.device),
              x], dim=1)
         x = x + self.positional_embedding.to(x.dtype)
-        # n = h*w+1
+                   
         n = x.shape[1]
 
         x = rearrange(x, '(b t) n c -> (b n) t c', t=self.num_frames)
@@ -477,23 +477,23 @@ class ViT_CLIP(nn.Module):
         x = x[:, 0]
         x = rearrange(x, '(b t) d -> b d t', b=B, t=T)
 
-        x = x.unsqueeze(-1).unsqueeze(-1)  # BDTHW for I3D head
+        x = x.unsqueeze(-1).unsqueeze(-1)                      
 
         return x
 
 
 class I3DHead(nn.Module):
-    """Classification head for I3D.
-
-    Args:
-        num_classes (int): Number of classes to be classified.
-        in_channels (int): Number of channels in input feature.
-            Default: dict(type='CrossEntropyLoss')
-        spatial_type (str): Pooling type in spatial dimension. Default: 'avg'.
-        dropout_ratio (float): Probability of dropout layer. Default: 0.5.
-        kwargs (dict, optional): Any keyword argument to be used to initialize
-            the head.
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+       
 
     def __init__(self,
                  num_classes,
@@ -513,31 +513,31 @@ class I3DHead(nn.Module):
         self.fc_cls = nn.Linear(self.in_channels, self.num_classes)
 
         if self.spatial_type == 'avg':
-            # use `nn.AdaptiveAvgPool3d` to adaptively match the in_channels.
+                                                                             
             self.avg_pool = nn.AdaptiveAvgPool3d((1, 1, 1))
         else:
             self.avg_pool = None
 
     def forward(self, x):
-        """Defines the computation performed at every call.
-
-        Args:
-            x (torch.Tensor): The input data.
-
-        Returns:
-            torch.Tensor: The classification scores for input samples.
-        """
-        # [N, in_channels, 4, 7, 7]
+\
+\
+\
+\
+\
+\
+\
+           
+                                   
         if self.avg_pool is not None:
             x = self.avg_pool(x)
-        # [N, in_channels, 1, 1, 1]
+                                   
         if self.dropout is not None:
             x = self.dropout(x)
-        # [N, in_channels, 1, 1, 1]
+                                   
         x = x.view(x.shape[0], -1)
-        # [N, in_channels]
+                          
         cls_score = self.fc_cls(x)
-        # [N, num_classes]
+                          
         return cls_score
 
 
