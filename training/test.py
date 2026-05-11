@@ -1,6 +1,3 @@
-"""
-eval pretained model.
-"""
 import os
 import numpy as np
 from os.path import join
