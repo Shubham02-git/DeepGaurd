@@ -1,4 +1,5 @@
-$python = ".\.venv\Scripts\python.exe"
+$scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$python = Join-Path $scriptRoot ".venv\Scripts\python.exe"
 $models = @(
     @{ name = "EfficientNetB4"; config = "training/config/detector/efficientnetb4_dfd.yaml" },
     @{ name = "UCF";            config = "training/config/detector/ucf_dfd.yaml" },
@@ -13,7 +14,7 @@ if (-not (Test-Path $python)) {
 Write-Host "Waiting for Xception to finish..."
 while ($true) {
     $running = Get-Process python -ErrorAction SilentlyContinue | Where-Object {
-        $_.Path -like "*DeepfakeBench-copy*" -and $_.Path -like "*.venv*"
+        $_.Path -like "*$($scriptRoot.Split('\')[-1])*" -and $_.Path -like "*.venv*"
     }
 
     if (-not $running -or $running.Count -le 1) {
